@@ -1,7 +1,6 @@
 package com.apollo.microservice.payment.services;
 
 import com.apollo.microservice.payment.enums.PaymentStatus;
-import com.apollo.microservice.payment.models.CouponModel;
 import com.apollo.microservice.payment.models.PaymentModel;
 import com.apollo.microservice.payment.repositories.CouponRepository;
 import com.apollo.microservice.payment.repositories.PaymentRepository;
@@ -9,7 +8,6 @@ import com.mercadopago.MercadoPagoConfig;
 import com.mercadopago.client.payment.PaymentClient;
 import com.mercadopago.client.payment.PaymentCreateRequest;
 import com.mercadopago.client.payment.PaymentPayerRequest;
-import com.mercadopago.exceptions.MPApiException;
 import lombok.SneakyThrows;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
