@@ -41,5 +41,17 @@ public class ServiceController {
         return ResponseEntity.status(204).body(service);
     }
 
+    @PutMapping("/edit")
+    public ResponseEntity<ServiceModel> editService(@Valid @RequestBody ServiceDTO serviceDTO) {
+        var service = serviceRepository.findById(serviceDTO.serviceId()).orElse(null);
 
+        if (service == null)
+            return ResponseEntity.badRequest().header("Error-Message", "Este serviço não foi encontrado!").build();
+
+        service.setPixKey(serviceDTO.pixKey());
+        service.setDiscordId(serviceDTO.discordId());
+        serviceRepository.saveAndFlush(service);
+
+        return ResponseEntity.ok(service);
+    }
 }
