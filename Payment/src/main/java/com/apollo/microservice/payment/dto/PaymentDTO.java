@@ -8,14 +8,6 @@ import lombok.Getter;
 
 @Getter
 @AllArgsConstructor
-public class PaymentDTO {
+public record PaymentDTO(@NotNull @NotBlank String payer, String coupon, @NotNull ServiceType serviceType) {
 
-    @NotNull
-    @NotBlank
-    private final String payer;
-
-    private final String coupon;
-
-    @NotNull
-    private final ServiceType serviceType;
 }

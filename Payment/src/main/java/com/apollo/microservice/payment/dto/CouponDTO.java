@@ -7,15 +7,6 @@ import lombok.Getter;
 
 @Getter
 @AllArgsConstructor
-public class CouponDTO {
+public record CouponDTO(@NotNull @NotBlank String name, @NotNull Integer discount, @NotNull Integer expirateDays) {
 
-    @NotNull
-    @NotBlank
-    private final String name;
-
-    @NotNull
-    private final Integer discount;
-
-    @NotNull
-    private final Integer expirateDays;
 }

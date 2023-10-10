@@ -20,11 +20,11 @@ public class CouponController {
     @PostMapping("/create")
     public ResponseEntity<CouponModel> createCoupon(@Valid @RequestBody CouponDTO couponDTO) {
         var calendar = Calendar.getInstance();
-        calendar.add(Calendar.DAY_OF_MONTH, couponDTO.getExpirateDays());
+        calendar.add(Calendar.DAY_OF_MONTH, couponDTO.expirateDays());
 
         var coupon = CouponModel.builder()
-                .name(couponDTO.getName())
-                .discount(couponDTO.getDiscount())
+                .name(couponDTO.name())
+                .discount(couponDTO.discount())
                 .createAt(Calendar.getInstance())
                 .expirateAt(calendar)
                 .isEnabled(true)
@@ -37,7 +37,7 @@ public class CouponController {
 
     @PutMapping("/disable")
     public ResponseEntity<CouponModel> disableCoupon(@RequestBody CouponDTO couponDTO) {
-        var coupon = couponRepository.findByName(couponDTO.getName()).orElse(null);
+        var coupon = couponRepository.findByName(couponDTO.name()).orElse(null);
 
         if (coupon == null)
             return ResponseEntity.badRequest().header("Error-Message", "Este cupom não foi encontrado!").build();
@@ -50,7 +50,7 @@ public class CouponController {
 
     @PutMapping("/enable")
     public ResponseEntity<CouponModel> enableCoupon(@RequestBody CouponDTO couponDTO) {
-        var coupon = couponRepository.findByName(couponDTO.getName()).orElse(null);
+        var coupon = couponRepository.findByName(couponDTO.name()).orElse(null);
 
         if (coupon == null)
             return ResponseEntity.badRequest().header("Error-Message", "Este cupom não foi encontrado!").build();
@@ -64,7 +64,7 @@ public class CouponController {
 
     @DeleteMapping("/delete")
     public ResponseEntity<Void> deleteCoupon(@RequestBody CouponDTO couponDTO) {
-        var coupon = couponRepository.findByName(couponDTO.getName()).orElse(null);
+        var coupon = couponRepository.findByName(couponDTO.name()).orElse(null);
 
         if (coupon == null)
             return ResponseEntity.badRequest().header("Error-Message", "Este cupom não foi encontrado!").build();

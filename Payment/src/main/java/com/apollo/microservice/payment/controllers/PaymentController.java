@@ -1,7 +1,6 @@
 package com.apollo.microservice.payment.controllers;
 
 import com.apollo.microservice.payment.dto.PaymentDTO;
-import com.apollo.microservice.payment.enums.PaymentStatus;
 import com.apollo.microservice.payment.models.PaymentModel;
 import com.apollo.microservice.payment.repositories.PaymentRepository;
 import com.apollo.microservice.payment.services.PaymentService;
@@ -30,18 +29,18 @@ public class PaymentController {
         var calendar = Calendar.getInstance();
         calendar.add(Calendar.MINUTE, 30);
 
-        if (paymentRepository.findByPayer(paymentDTO.getPayer()).isPresent())
-            return ResponseEntity.ok(paymentRepository.findByPayer(paymentDTO.getPayer()).get());
+        if (paymentRepository.findByPayer(paymentDTO.payer()).isPresent())
+            return ResponseEntity.ok(paymentRepository.findByPayer(paymentDTO.payer()).get());
 
         var payment = PaymentModel.builder()
-                .payer(paymentDTO.getPayer())
-                .price(paymentDTO.getServiceType().getPrice())
-                .serviceType(paymentDTO.getServiceType())
+                .payer(paymentDTO.payer())
+                .price(paymentDTO.serviceType().getPrice())
+                .serviceType(paymentDTO.serviceType())
                 .createAt(Calendar.getInstance())
                 .expirateAt(calendar)
                 .build();
 
-        paymentService.assertCoupon(payment, paymentDTO.getCoupon());
+        paymentService.assertCoupon(payment, paymentDTO.coupon());
 
         return ResponseEntity.ok(paymentService.generatePaymentData(payment));
     }
