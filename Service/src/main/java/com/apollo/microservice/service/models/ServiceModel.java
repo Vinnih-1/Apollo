@@ -26,6 +26,12 @@ public class ServiceModel {
     @Column
     private String discordId;
 
+    @Column
+    private String mpCode;
+
+    @Column
+    private boolean isSuspended;
+
     @OneToMany(fetch = FetchType.EAGER)
     private List<ProductModel> products;
 
