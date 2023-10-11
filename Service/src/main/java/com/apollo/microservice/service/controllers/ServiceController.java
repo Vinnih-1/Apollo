@@ -34,6 +34,7 @@ public class ServiceController {
                 .expirateAt(calendar)
                 .products(new ArrayList<>())
                 .coupons(new ArrayList<>())
+                .isSuspended(false)
                 .build();
 
         serviceRepository.saveAndFlush(service);
@@ -50,6 +51,19 @@ public class ServiceController {
 
         service.setPixKey(serviceDTO.pixKey());
         service.setDiscordId(serviceDTO.discordId());
+        serviceRepository.saveAndFlush(service);
+
+        return ResponseEntity.ok(service);
+    }
+
+    @PutMapping("/suspend")
+    public ResponseEntity<ServiceModel> suspendService(@Valid @RequestBody ServiceDTO serviceDTO) {
+        var service = serviceRepository.findById(serviceDTO.serviceId()).orElse(null);
+
+        if (service == null)
+            return ResponseEntity.badRequest().header("Error-Message", "Este serviço não foi encontrado!").build();
+
+        service.setSuspended(true);
         serviceRepository.saveAndFlush(service);
 
         return ResponseEntity.ok(service);
