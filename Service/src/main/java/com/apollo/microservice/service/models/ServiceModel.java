@@ -27,7 +27,7 @@ public class ServiceModel {
     private String discordId;
 
     @Column
-    private String mpCode;
+    private String accessToken;
 
     @Column
     private boolean isSuspended;
