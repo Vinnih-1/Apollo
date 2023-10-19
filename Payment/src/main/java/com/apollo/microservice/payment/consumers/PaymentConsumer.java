@@ -25,6 +25,9 @@ public class PaymentConsumer {
 
     @RabbitListener(queues = "${broker.queue.payment.name}")
     public void listenPaymentQueue(@Payload PaymentDTO paymentDTO) {
+        var expirateAt = Calendar.getInstance();
+        expirateAt.add(Calendar.MINUTE, 30);
+
         var paymentModel = PaymentModel.builder()
                 .paymentStatus(paymentDTO.paymentStatus())
                 .paymentIntent(paymentDTO.paymentIntent())
@@ -35,11 +38,10 @@ public class PaymentConsumer {
                 .productId(paymentDTO.productId())
                 .id(paymentDTO.id())
                 .createAt(Calendar.getInstance())
-                .expirateAt(Calendar.getInstance())
+                .expirateAt(expirateAt)
                 .build();
 
         paymentModel = paymentService.generatePaymentData(paymentModel);
-
         servicePaymentProducer.sendProductPaymentMessage(paymentModel);
     }
 
