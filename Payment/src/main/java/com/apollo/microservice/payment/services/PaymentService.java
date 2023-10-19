@@ -2,7 +2,6 @@ package com.apollo.microservice.payment.services;
 
 import com.apollo.microservice.payment.enums.PaymentStatus;
 import com.apollo.microservice.payment.models.PaymentModel;
-import com.apollo.microservice.payment.repositories.CouponRepository;
 import com.apollo.microservice.payment.repositories.PaymentRepository;
 import com.mercadopago.MercadoPagoConfig;
 import com.mercadopago.client.payment.PaymentClient;
@@ -20,9 +19,6 @@ public class PaymentService {
 
     @Autowired
     private PaymentRepository paymentRepository;
-
-    @Autowired
-    private CouponRepository couponRepository;
 
     public PaymentService() {
         MercadoPagoConfig.setAccessToken(EnviromentService.getInstance().getEnv("MP_PRODUCTION_ACCESS_TOKEN"));
@@ -54,19 +50,17 @@ public class PaymentService {
         return paymentModel;
     }
 
-    public void assertCoupon(PaymentModel paymentModel, String couponName) {
-        var coupon = couponRepository.findByName(couponName).orElse(null);
+    public void assertCoupon(PaymentModel paymentModel) {
+        var coupon = paymentModel.getCoupon();
 
         if (coupon == null) return;
-        if (!coupon.isEnabled()) return;
 
-        var value = (double) coupon.getDiscount() / 100;
+        var value = (double) coupon.discount() / 100;
         var discountedValue = value * paymentModel.getServiceType().getPrice();
         var finalValue = Double.parseDouble(new DecimalFormat("#.00").format(
                 paymentModel.getServiceType().getPrice() - discountedValue
         ));
 
-        paymentModel.setCoupon(couponName);
         paymentModel.setPrice(finalValue);
     }
 }
