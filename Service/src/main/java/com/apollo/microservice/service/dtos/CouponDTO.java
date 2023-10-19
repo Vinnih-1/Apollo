@@ -6,7 +6,7 @@ import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 
 @Embeddable
-public record CouponDTO(@Column(insertable = false, updatable = false) Long id,
+public record CouponDTO(@Column(insertable = false, updatable = false) Long couponId,
                         @NotNull @NotBlank String name,
                         @NotNull Integer discount,
                         @NotNull Integer expirateDays,

@@ -52,7 +52,7 @@ public class CouponController {
         if (service == null)
             return ResponseEntity.badRequest().header("Error-Message", "Este serviço não foi encontrado!").build();
 
-        var coupon = couponRepository.findById(couponDTO.id()).orElse(null);
+        var coupon = couponRepository.findById(couponDTO.couponId()).orElse(null);
 
         if (coupon == null)
             return ResponseEntity.badRequest().header("Error-Message", "Este cupom não foi encontrado!").build();
@@ -72,7 +72,7 @@ public class CouponController {
         if (service == null)
             return ResponseEntity.badRequest().header("Error-Message", "Este serviço não foi encontrado!").build();
 
-        var coupon = couponRepository.findById(couponDTO.id()).orElse(null);
+        var coupon = couponRepository.findById(couponDTO.couponId()).orElse(null);
 
         if (coupon == null)
             return ResponseEntity.badRequest().header("Error-Message", "Este cupom não foi encontrado!").build();
@@ -92,7 +92,7 @@ public class CouponController {
         if (service == null)
             return ResponseEntity.badRequest().header("Error-Message", "Este serviço não foi encontrado!").build();
 
-        var coupon = couponRepository.findById(couponDTO.id()).orElse(null);
+        var coupon = couponRepository.findById(couponDTO.couponId()).orElse(null);
 
         if (coupon == null)
             return ResponseEntity.badRequest().header("Error-Message", "Este cupom não foi encontrado!").build();
