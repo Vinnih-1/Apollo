@@ -39,7 +39,6 @@ public class CouponController {
                 .serviceId(couponDTO.serviceId())
                 .build();
 
-        service.getCoupons().add(coupon);
         serviceRepository.saveAndFlush(service);
         couponRepository.saveAndFlush(coupon);
 
@@ -59,8 +58,7 @@ public class CouponController {
             return ResponseEntity.badRequest().header("Error-Message", "Este cupom não foi encontrado!").build();
 
         coupon.setEnabled(true);
-        service.getCoupons().remove(coupon);
-        service.getCoupons().add(coupon);
+
         serviceRepository.saveAndFlush(service);
         couponRepository.saveAndFlush(coupon);
 
@@ -80,8 +78,7 @@ public class CouponController {
             return ResponseEntity.badRequest().header("Error-Message", "Este cupom não foi encontrado!").build();
 
         coupon.setEnabled(false);
-        service.getCoupons().remove(coupon);
-        service.getCoupons().add(coupon);
+
         serviceRepository.saveAndFlush(service);
         couponRepository.saveAndFlush(coupon);
 
@@ -100,7 +97,6 @@ public class CouponController {
         if (coupon == null)
             return ResponseEntity.badRequest().header("Error-Message", "Este cupom não foi encontrado!").build();
 
-        service.getCoupons().remove(coupon);
         serviceRepository.saveAndFlush(service);
         couponRepository.delete(coupon);
 
