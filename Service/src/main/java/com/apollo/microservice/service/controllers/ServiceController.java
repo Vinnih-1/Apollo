@@ -32,8 +32,6 @@ public class ServiceController {
                 .discordId(serviceDTO.discordId())
                 .createAt(Calendar.getInstance())
                 .expirateAt(calendar)
-                .products(new ArrayList<>())
-                .coupons(new ArrayList<>())
                 .isSuspended(false)
                 .build();
 

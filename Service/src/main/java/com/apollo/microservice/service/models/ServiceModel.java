@@ -1,15 +1,18 @@
 package com.apollo.microservice.service.models;
 
 import jakarta.persistence.*;
+import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
+import lombok.NoArgsConstructor;
 
 import java.util.Calendar;
-import java.util.List;
 
 @Data
 @Builder
 @Entity
+@AllArgsConstructor
+@NoArgsConstructor
 @Table(name = "services")
 public class ServiceModel {
 
@@ -31,12 +34,6 @@ public class ServiceModel {
 
     @Column
     private boolean isSuspended;
-
-    @OneToMany(fetch = FetchType.EAGER)
-    private List<ProductModel> products;
-
-    @OneToMany(fetch = FetchType.EAGER)
-    private List<CouponModel> coupons;
 
     @Temporal(TemporalType.DATE)
     private Calendar createAt;
