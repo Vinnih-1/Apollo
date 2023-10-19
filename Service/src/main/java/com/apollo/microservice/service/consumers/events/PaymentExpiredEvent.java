@@ -10,6 +10,6 @@ public class PaymentExpiredEvent extends BaseEvent {
 
     @Override
     public void execute(PaymentModel paymentModel) {
-        System.out.println("pagamento expirado");
+        System.out.println("Pagamento expirado: " + paymentModel.toString());
     }
 }
