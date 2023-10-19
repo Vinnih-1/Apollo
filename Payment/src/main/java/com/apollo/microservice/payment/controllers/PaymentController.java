@@ -34,13 +34,12 @@ public class PaymentController {
 
         var payment = PaymentModel.builder()
                 .payer(paymentDTO.payer())
-                .price(paymentDTO.serviceType().getPrice())
-                .serviceType(paymentDTO.serviceType())
+                .price(paymentDTO.price())
                 .createAt(Calendar.getInstance())
                 .expirateAt(calendar)
                 .build();
 
-        paymentService.assertCoupon(payment, paymentDTO.coupon());
+        paymentService.assertCoupon(payment);
 
         return ResponseEntity.ok(paymentService.generatePaymentData(payment));
     }
