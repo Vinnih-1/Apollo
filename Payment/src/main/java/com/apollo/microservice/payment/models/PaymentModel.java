@@ -1,5 +1,7 @@
 package com.apollo.microservice.payment.models;
 
+import com.apollo.microservice.payment.dto.CouponDTO;
+import com.apollo.microservice.payment.enums.PaymentIntent;
 import com.apollo.microservice.payment.enums.PaymentStatus;
 import com.apollo.microservice.payment.enums.ServiceType;
 import jakarta.persistence.*;
@@ -29,13 +31,22 @@ public class PaymentModel {
     private PaymentStatus paymentStatus;
 
     @Column
+    private PaymentIntent paymentIntent;
+
+    @Column
     private double price;
+
+    @Column
+    private Long productId;
+
+    @Column
+    private String serviceId;
 
     @Column
     private String payer;
 
-    @Column
-    private String coupon;
+    @Embedded
+    private CouponDTO coupon;
 
     @Column
     private Calendar createAt;
@@ -48,6 +59,4 @@ public class PaymentModel {
 
     @Column(length = 5000)
     private String qrcodeBase64;
-
-
 }
