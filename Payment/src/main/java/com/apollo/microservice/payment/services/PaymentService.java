@@ -1,7 +1,9 @@
 package com.apollo.microservice.payment.services;
 
+import com.apollo.microservice.payment.enums.PaymentIntent;
 import com.apollo.microservice.payment.enums.PaymentStatus;
 import com.apollo.microservice.payment.models.PaymentModel;
+import com.apollo.microservice.payment.producers.ServicePaymentProducer;
 import com.apollo.microservice.payment.repositories.PaymentRepository;
 import com.mercadopago.MercadoPagoConfig;
 import com.mercadopago.client.payment.PaymentClient;
@@ -9,13 +11,19 @@ import com.mercadopago.client.payment.PaymentCreateRequest;
 import com.mercadopago.client.payment.PaymentPayerRequest;
 import lombok.SneakyThrows;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
 
 import java.math.BigDecimal;
 import java.text.DecimalFormat;
+import java.util.Calendar;
+import java.util.concurrent.TimeUnit;
 
 @Component
 public class PaymentService {
+
+    @Autowired
+    private ServicePaymentProducer servicePaymentProducer;
 
     @Autowired
     private PaymentRepository paymentRepository;
@@ -48,6 +56,23 @@ public class PaymentService {
         paymentRepository.saveAndFlush(paymentModel);
 
         return paymentModel;
+    }
+
+    @Scheduled(timeUnit = TimeUnit.SECONDS, fixedDelay = 1L)
+    public void deleteExpiredPayments() {
+        var calendar = Calendar.getInstance();
+        var payments = paymentRepository.findExpiredPayments(calendar);
+
+        payments.stream()
+                .filter(payment -> payment.getPaymentIntent() == PaymentIntent.SELL_PRODUCT)
+                .forEach(payment -> {
+                    payment.setPaymentStatus(PaymentStatus.EXPIRED);
+                    servicePaymentProducer.sendProductPaymentMessage(payment);
+                });
+
+        paymentRepository.deleteAll(payments);
+
+        System.out.println(payments);
     }
 
     public void assertCoupon(PaymentModel paymentModel) {
