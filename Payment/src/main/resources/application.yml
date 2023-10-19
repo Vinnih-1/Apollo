@@ -10,3 +10,14 @@ spring:
     url: jdbc:mysql://localhost:3306/payments
     username: root
     password: 30122003
+  rabbitmq:
+    addresses: amqps://ekwvjomf:s-sKR3MLT-nO2IoiGseI50e6jCkdvDKJ@jackal.rmq.cloudamqp.com/ekwvjomf
+  main:
+    allow-circular-references: true
+
+broker:
+  queue:
+    payment:
+      name: default.payment
+    service:
+      name: default.service
