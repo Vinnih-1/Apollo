@@ -36,7 +36,6 @@ public class ProductController {
                 .createAt(Calendar.getInstance())
                 .build();
 
-        service.getProducts().add(product);
         productRepository.saveAndFlush(product);
         serviceRepository.saveAndFlush(service);
 
@@ -55,7 +54,6 @@ public class ProductController {
         if (product == null)
             return ResponseEntity.badRequest().header("Error-Message", "Este produto não foi encontrado!").build();
 
-        service.getProducts().remove(product);
         productRepository.delete(product);
         serviceRepository.saveAndFlush(service);
 
