@@ -69,10 +69,7 @@ public class PaymentService {
                     payment.setPaymentStatus(PaymentStatus.EXPIRED);
                     servicePaymentProducer.sendProductPaymentMessage(payment);
                 });
-
         paymentRepository.deleteAll(payments);
-
-        System.out.println(payments);
     }
 
     public void assertCoupon(PaymentModel paymentModel) {
