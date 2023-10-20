@@ -43,6 +43,12 @@ public class PaymentModel {
     private String payer;
 
     @Column
+    private String externalReference;
+
+    @Column
+    private String accessToken;
+
+    @Column
     private Long productId;
 
     @Embedded

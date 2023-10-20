@@ -45,6 +45,12 @@ public class PaymentModel {
     @Column
     private String payer;
 
+    @Column
+    private String externalReference;
+
+    @Column
+    private String accessToken;
+
     @Embedded
     private CouponDTO coupon;
 
