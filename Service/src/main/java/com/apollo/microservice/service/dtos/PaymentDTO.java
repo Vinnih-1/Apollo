@@ -7,6 +7,7 @@ public record PaymentDTO(
         String id,
         String payer,
         String serviceId,
+        String accessToken,
         CouponDTO coupon,
         PaymentStatus paymentStatus,
         PaymentIntent paymentIntent,
