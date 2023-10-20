@@ -14,6 +14,6 @@ public class PaymentSuccessEvent extends BaseEvent {
 
     @Override
     public void execute(PaymentModel paymentModel) {
-        System.out.println("pagamento aprovado");
+        System.out.println("Pagando Aprovado: " + paymentModel.toString());
     }
 }
