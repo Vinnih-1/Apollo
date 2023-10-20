@@ -1,6 +1,5 @@
 package com.apollo.microservice.service.producers;
 
-import com.apollo.microservice.service.dtos.CouponDTO;
 import com.apollo.microservice.service.dtos.PaymentDTO;
 import com.apollo.microservice.service.models.PaymentModel;
 import com.apollo.microservice.service.repositories.CouponRepository;
