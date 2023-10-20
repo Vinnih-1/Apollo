@@ -34,6 +34,7 @@ public class ServicePaymentProducer {
                 paymentModel.getId(),
                 paymentModel.getPayer(),
                 product.getServiceId(),
+                paymentModel.getAccessToken(),
                 paymentModel.getCoupon() != null ? paymentModel.getCoupon() : null,
                 paymentModel.getPaymentStatus(),
                 paymentModel.getPaymentIntent(),
