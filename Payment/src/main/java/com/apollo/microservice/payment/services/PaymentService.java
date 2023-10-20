@@ -9,17 +9,19 @@ import com.mercadopago.MercadoPagoConfig;
 import com.mercadopago.client.payment.PaymentClient;
 import com.mercadopago.client.payment.PaymentCreateRequest;
 import com.mercadopago.client.payment.PaymentPayerRequest;
-import lombok.SneakyThrows;
+import com.mercadopago.core.MPRequestOptions;
+import com.mercadopago.exceptions.MPApiException;
+import com.mercadopago.exceptions.MPException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.scheduling.annotation.Scheduled;
-import org.springframework.stereotype.Component;
+import org.springframework.stereotype.Service;
 
 import java.math.BigDecimal;
 import java.text.DecimalFormat;
 import java.util.Calendar;
 import java.util.concurrent.TimeUnit;
 
-@Component
+@Service
 public class PaymentService {
 
     @Autowired
@@ -28,14 +30,15 @@ public class PaymentService {
     @Autowired
     private PaymentRepository paymentRepository;
 
-    public PaymentService() {
-        MercadoPagoConfig.setAccessToken(EnviromentService.getInstance().getEnv("MP_PRODUCTION_ACCESS_TOKEN"));
-    }
-
-    @SneakyThrows
     public PaymentModel generatePaymentData(PaymentModel paymentModel) {
+        if (paymentModel.getAccessToken() != null && paymentModel.getPaymentIntent() == PaymentIntent.SELL_PRODUCT)
+            MercadoPagoConfig.setAccessToken(paymentModel.getAccessToken());
+        else
+            MercadoPagoConfig.setAccessToken(EnviromentService.getInstance().getEnv("MP_PRODUCTION_ACCESS_TOKEN"));
+
         var request = PaymentCreateRequest.builder()
                 .installments(1)
+                .notificationUrl("https://payments.apollodiscord.com/notification?cliente=" + paymentModel.getId())
                 .paymentMethodId("pix")
                 .description("Serviços da Apollo")
                 .transactionAmount(BigDecimal.valueOf(paymentModel.getPrice()))
@@ -46,19 +49,52 @@ public class PaymentService {
                 .build();
 
         var client = new PaymentClient();
-        var response = client.create(request);
-        var transactionData = response.getPointOfInteraction().getTransactionData();
 
-        paymentModel.setQrcodeBase64(transactionData.getQrCodeBase64());
-        paymentModel.setQrcode(transactionData.getQrCode());
-        paymentModel.setPaymentStatus(PaymentStatus.PENDING);
+        try {
+            var response = client.create(request);
+            var transactionData = response.getPointOfInteraction().getTransactionData();
 
-        paymentRepository.saveAndFlush(paymentModel);
+            paymentModel.setQrcodeBase64(transactionData.getQrCodeBase64());
+            paymentModel.setQrcode(transactionData.getQrCode());
+            paymentModel.setPaymentStatus(PaymentStatus.PENDING);
+            paymentModel.setExternalReference(paymentModel.getId());
 
-        return paymentModel;
+            paymentRepository.saveAndFlush(paymentModel);
+
+            return paymentModel;
+        } catch (MPApiException e) {
+            System.err.println(e.getApiResponse().getContent());
+            return null;
+        } catch (MPException e) {
+            throw new RuntimeException(e);
+        }
     }
 
-    @Scheduled(timeUnit = TimeUnit.SECONDS, fixedDelay = 1L)
+    public void updatePaymentStatus(String externalReference, String id) {
+        var paymentModel = paymentRepository.findByExternalReference(externalReference).orElse(null);
+
+        if (paymentModel == null) return;
+        var client = new PaymentClient();
+
+        try {
+            System.out.println("Payment ID: " + Long.parseLong(id));
+            var response = client.get(Long.parseLong(id), MPRequestOptions.builder()
+                    .accessToken(paymentModel.getAccessToken())
+                    .build());
+
+            if (response.getStatus().equals("approved")) {
+                paymentModel.setPaymentStatus(PaymentStatus.PAYED);
+                servicePaymentProducer.sendProductPaymentMessage(paymentModel);
+                paymentRepository.delete(paymentModel);
+            }
+        } catch (MPException e) {
+            throw new RuntimeException(e);
+        } catch (MPApiException e) {
+            System.err.println(e.getApiResponse().getContent());
+        }
+    }
+
+    @Scheduled(timeUnit = TimeUnit.MINUTES, fixedDelay = 1L)
     public void deleteExpiredPayments() {
         var calendar = Calendar.getInstance();
         var payments = paymentRepository.findExpiredPayments(calendar);
