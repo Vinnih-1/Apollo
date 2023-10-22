@@ -6,7 +6,7 @@ import lombok.Getter;
 
 @Getter
 @AllArgsConstructor
-public abstract class BaseEvent {
+public abstract class BasePaymentEvent {
     
     private final String event;
     

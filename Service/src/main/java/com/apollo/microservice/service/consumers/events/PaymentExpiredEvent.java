@@ -2,7 +2,7 @@ package com.apollo.microservice.service.consumers.events;
 
 import com.apollo.microservice.service.models.PaymentModel;
 
-public class PaymentExpiredEvent extends BaseEvent {
+public class PaymentExpiredEvent extends BasePaymentEvent {
 
     public PaymentExpiredEvent() {
         super("payment-expired");

@@ -1,6 +1,6 @@
 package com.apollo.microservice.service.consumers;
 
-import com.apollo.microservice.service.consumers.events.BaseEvent;
+import com.apollo.microservice.service.consumers.events.BasePaymentEvent;
 import com.apollo.microservice.service.consumers.events.PaymentCreatedEvent;
 import com.apollo.microservice.service.consumers.events.PaymentExpiredEvent;
 import com.apollo.microservice.service.consumers.events.PaymentSuccessEvent;
@@ -18,14 +18,14 @@ import java.util.List;
 @Component
 public class ServiceConsumer {
 
-    private final List<BaseEvent> events = Arrays.asList(
+    private final List<BasePaymentEvent> events = Arrays.asList(
             new PaymentSuccessEvent(),
             new PaymentExpiredEvent(),
             new PaymentCreatedEvent()
     );
 
     @RabbitListener(queues = "${broker.queue.service.name}")
-    public void listenServiceQueue(@Payload PaymentModel paymentModel) {
+    public void listenServicePaymentQueue(@Payload PaymentModel paymentModel) {
         events.stream()
                 .filter(event -> event.getEvent().equals(paymentModel.getPaymentStatus().getName()))
                 .findFirst()

@@ -4,7 +4,7 @@ import com.apollo.microservice.service.models.PaymentModel;
 import org.springframework.stereotype.Component;
 
 @Component
-public class PaymentSuccessEvent extends BaseEvent {
+public class PaymentSuccessEvent extends BasePaymentEvent {
 
     // inserir registro de pagamento no banco de dados
 
