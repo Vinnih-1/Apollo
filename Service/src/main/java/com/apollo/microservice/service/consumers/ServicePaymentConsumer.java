@@ -16,7 +16,7 @@ import java.util.Arrays;
 import java.util.List;
 
 @Component
-public class ServiceConsumer {
+public class ServicePaymentConsumer {
 
     private final List<BasePaymentEvent> events = Arrays.asList(
             new PaymentSuccessEvent(),
