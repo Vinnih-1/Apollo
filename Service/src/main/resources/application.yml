@@ -1,0 +1,28 @@
+server:
+  port: 8082
+
+spring:
+  jpa:
+    show-sql: true
+    hibernate:
+      ddl-auto: update
+  datasource:
+    url: jdbc:mysql://localhost:3306/services
+    username: service
+    password: 30122003
+  rabbitmq:
+    addresses: amqps://ekwvjomf:s-sKR3MLT-nO2IoiGseI50e6jCkdvDKJ@jackal.rmq.cloudamqp.com/ekwvjomf
+
+broker:
+  queue:
+    service:
+      name: default.service
+    payment:
+      name: default.payment
+    discord:
+      name: default.discord
+    auth:
+      discord: auth.discord
+      service: auth.service
+      payment: auth.payment
+      result: auth.result
