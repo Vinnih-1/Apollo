@@ -1,6 +1,9 @@
 package com.apollo.microservice.service.controllers;
 
+import com.apollo.microservice.service.enums.AuthStatus;
 import com.apollo.microservice.service.models.ServiceModel;
+import com.apollo.microservice.service.producers.PaymentAuthorizeProducer;
+import com.apollo.microservice.service.repositories.AuthorizeRepository;
 import com.apollo.microservice.service.repositories.ServiceRepository;
 import com.apollo.microservice.service.services.MercadoPagoService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -18,6 +21,12 @@ public class AuthenticationController {
     @Autowired
     private MercadoPagoService mercadoPagoService;
 
+    @Autowired
+    private AuthorizeRepository authorizeRepository;
+
+    @Autowired
+    private PaymentAuthorizeProducer paymentAuthorizeProducer;
+
     @GetMapping("/")
     public ResponseEntity<ServiceModel> authenticationService(
             @RequestParam("code") String code,
@@ -27,7 +36,6 @@ public class AuthenticationController {
 
         if (service == null)
             return ResponseEntity.badRequest().header("Error-Message", "Este serviço não foi encontrado!").build();
-
         var accessToken = mercadoPagoService.generateAccessToken(code);
 
         if (accessToken == null)
@@ -35,7 +43,13 @@ public class AuthenticationController {
 
         service.setAccessToken(accessToken);
         serviceRepository.saveAndFlush(service);
+        authorizeRepository.findByServiceId(state)
+                .ifPresent(authorizeModel -> {
+                    authorizeModel.setAuthStatus(AuthStatus.AUTH_SUCCESS);
+                    paymentAuthorizeProducer.publishPaymentAuthorizeResponse(authorizeModel);
+                    authorizeRepository.delete(authorizeModel);
+                });
 
-        return ResponseEntity.ok(service);
+        return ResponseEntity.ok().build();
     }
 }
