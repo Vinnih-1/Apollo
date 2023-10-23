@@ -8,6 +8,11 @@ build/
 .env
 .env-development
 
+*.bin
+
+MercadoPagoService.java
+CreatePaymentMessageTests.java
+
 ### STS ###
 .apt_generated
 .classpath

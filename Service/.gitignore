@@ -4,7 +4,13 @@ build/
 !gradle/wrapper/gradle-wrapper.jar
 !**/src/main/**/build/
 !**/src/test/**/build/
-application.yml
+
+*.bin
+
+src/test/*
+
+MercadoPagoService.java
+CreatePaymentMessageTests.java
 
 ### STS ###
 .apt_generated
