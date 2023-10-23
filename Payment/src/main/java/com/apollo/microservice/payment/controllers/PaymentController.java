@@ -1,6 +1,6 @@
 package com.apollo.microservice.payment.controllers;
 
-import com.apollo.microservice.payment.dto.PaymentDTO;
+import com.apollo.microservice.payment.dtos.PaymentDTO;
 import com.apollo.microservice.payment.models.PaymentModel;
 import com.apollo.microservice.payment.repositories.PaymentRepository;
 import com.apollo.microservice.payment.services.PaymentService;

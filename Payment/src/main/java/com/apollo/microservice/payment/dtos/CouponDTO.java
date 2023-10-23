@@ -1,4 +1,4 @@
-package com.apollo.microservice.payment.dto;
+package com.apollo.microservice.payment.dtos;
 
 import jakarta.persistence.Column;
 import jakarta.persistence.Embeddable;

@@ -1,6 +1,6 @@
 package com.apollo.microservice.payment.models;
 
-import com.apollo.microservice.payment.dto.CouponDTO;
+import com.apollo.microservice.payment.dtos.CouponDTO;
 import com.apollo.microservice.payment.enums.PaymentIntent;
 import com.apollo.microservice.payment.enums.PaymentStatus;
 import com.apollo.microservice.payment.enums.ServiceType;

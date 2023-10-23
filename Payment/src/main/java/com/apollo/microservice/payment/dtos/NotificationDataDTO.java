@@ -1,4 +1,4 @@
-package com.apollo.microservice.payment.dto;
+package com.apollo.microservice.payment.dtos;
 
 public record NotificationDataDTO(String id) {
 }

@@ -1,10 +1,7 @@
-package com.apollo.microservice.payment.dto;
+package com.apollo.microservice.payment.dtos;
 
 import com.apollo.microservice.payment.enums.PaymentIntent;
 import com.apollo.microservice.payment.enums.PaymentStatus;
-import com.apollo.microservice.payment.enums.ServiceType;
-import jakarta.validation.constraints.NotBlank;
-import jakarta.validation.constraints.NotNull;
 
 public record PaymentDTO(
         String id,

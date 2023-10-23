@@ -1,6 +1,6 @@
 package com.apollo.microservice.payment.controllers;
 
-import com.apollo.microservice.payment.dto.NotificationDTO;
+import com.apollo.microservice.payment.dtos.NotificationDTO;
 import com.apollo.microservice.payment.services.PaymentService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
