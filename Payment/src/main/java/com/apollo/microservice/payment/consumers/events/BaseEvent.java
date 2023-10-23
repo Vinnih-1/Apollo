@@ -1,6 +1,6 @@
 package com.apollo.microservice.payment.consumers.events;
 
-import com.apollo.microservice.payment.dto.PaymentDTO;
+import com.apollo.microservice.payment.dtos.PaymentDTO;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 
