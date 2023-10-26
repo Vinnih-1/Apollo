@@ -4,11 +4,11 @@ import com.apollo.microservice.service.dtos.ServiceDTO;
 import com.apollo.microservice.service.models.ServiceModel;
 import com.apollo.microservice.service.repositories.ServiceRepository;
 import jakarta.validation.Valid;
+import org.apache.commons.lang3.RandomStringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
-import java.util.ArrayList;
 import java.util.Calendar;
 
 @RestController
@@ -28,7 +28,7 @@ public class ServiceController {
 
         var service = ServiceModel.builder()
                 .owner(serviceDTO.owner())
-                .pixKey(serviceDTO.pixKey())
+                .serviceKey(RandomStringUtils.randomAlphanumeric(8))
                 .discordId(serviceDTO.discordId())
                 .createAt(Calendar.getInstance())
                 .expirateAt(calendar)
@@ -37,7 +37,7 @@ public class ServiceController {
 
         serviceRepository.saveAndFlush(service);
 
-        return ResponseEntity.status(204).body(service);
+        return ResponseEntity.ok(service);
     }
 
     @PutMapping("/edit")
@@ -47,7 +47,6 @@ public class ServiceController {
         if (service == null)
             return ResponseEntity.badRequest().header("Error-Message", "Este serviço não foi encontrado!").build();
 
-        service.setPixKey(serviceDTO.pixKey());
         service.setDiscordId(serviceDTO.discordId());
         serviceRepository.saveAndFlush(service);
 

@@ -8,4 +8,6 @@ import java.util.Optional;
 public interface ServiceRepository extends JpaRepository<ServiceModel, String> {
 
     Optional<ServiceModel> findByOwner(String owner);
+
+    Optional<ServiceModel> findByServiceKey(String serviceKey);
 }

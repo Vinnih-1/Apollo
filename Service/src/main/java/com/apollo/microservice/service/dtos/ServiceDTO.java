@@ -7,7 +7,6 @@ import jakarta.validation.constraints.NotNull;
 public record ServiceDTO(
         String serviceId,
         @NotNull @NotBlank String owner,
-        @NotNull @NotBlank String pixKey,
-        @NotNull @NotBlank String discordId,
+        String discordId,
         @NotNull ServiceType serviceType) {
 }

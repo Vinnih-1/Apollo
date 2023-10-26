@@ -23,8 +23,8 @@ public class ServiceModel {
     @Column
     private String owner;
 
-    @Column
-    private String pixKey;
+    @Column(unique = true)
+    private String serviceKey;
 
     @Column
     private String discordId;

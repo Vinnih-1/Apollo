@@ -22,10 +22,11 @@ public class AuthorizeModalListener extends BaseModalListener {
 
     @Override
     public void execute(ModalInteractionEvent event) {
+        var serviceKey = event.getValue("service_key").getAsString();
         var serviceId = event.getValue("service_id").getAsString();
         var authorizeDto = new AuthorizeDTO(
                 serviceId,
-                "",
+                serviceKey,
                 event.getGuild().getId() + "_" + event.getChannel().getId(),
                 "",
                 ""
