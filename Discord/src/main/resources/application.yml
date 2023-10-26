@@ -12,6 +12,8 @@ spring:
     password: 30122003
   rabbitmq:
     addresses: amqps://ekwvjomf:s-sKR3MLT-nO2IoiGseI50e6jCkdvDKJ@jackal.rmq.cloudamqp.com/ekwvjomf
+  main:
+    allow-circular-references: true
 
 broker:
   queue:
