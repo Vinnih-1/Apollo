@@ -45,6 +45,7 @@ public class DiscordAuthorizeConsumer {
 
         authorizate.setAuthorizeUrl(authorizeModel.getAuthorizeUrl());
         authorizate.setAuthStatus(authorizeModel.getAuthStatus());
+        authorizate.setDiscordId(authorizeModel.getDiscordId());
         authorizeRepository.saveAndFlush(authorizate);
         paymentAuthorizeProducer.publishPaymentAuthorizeResponse(authorizate);
     }
