@@ -24,9 +24,15 @@ public class AuthorizeSlashCommand extends BaseSlashCommand {
 
         modal.addActionRow(TextInput.create("service_id", "ID do Serviço", TextInputStyle.SHORT)
                         .setRequired(true)
-                        .setPlaceholder("a81e5ab7-eca9-47db-a968-6ee7a831ba30")
+                        .setPlaceholder("XXXXXXXX-XXXX-XXXX-XXXX-XXXXXXXXXXXX")
                         .setMaxLength(36)
                         .setMinLength(36)
+                .build());
+        modal.addActionRow(TextInput.create("service_key", "Chave do Serviço", TextInputStyle.SHORT)
+                .setRequired(true)
+                .setPlaceholder("XXXXXXXX")
+                .setMaxLength(8)
+                .setMinLength(8)
                 .build());
 
         event.replyModal(modal.build()).queue();
