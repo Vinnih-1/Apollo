@@ -42,13 +42,14 @@ public class AuthenticationController {
             return ResponseEntity.badRequest().header("Error-Message", "Não foi possível gerar o Access Token!").build();
 
         service.setAccessToken(accessToken);
-        serviceRepository.saveAndFlush(service);
         authorizeRepository.findByServiceId(state)
                 .ifPresent(authorizeModel -> {
                     authorizeModel.setAuthStatus(AuthStatus.AUTH_SUCCESS);
+                    service.setDiscordId(authorizeModel.getDiscordId());
                     paymentAuthorizeProducer.publishPaymentAuthorizeResponse(authorizeModel);
                     authorizeRepository.delete(authorizeModel);
                 });
+        serviceRepository.saveAndFlush(service);
 
         return ResponseEntity.ok().build();
     }
