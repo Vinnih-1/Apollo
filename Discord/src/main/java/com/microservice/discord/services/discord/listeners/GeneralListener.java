@@ -1,14 +1,22 @@
 package com.microservice.discord.services.discord.listeners;
 
-import com.microservice.discord.producers.AuthorizeServiceProducer;
+import com.microservice.discord.services.discord.listeners.buttonlisteners.BaseButtonListener;
+import com.microservice.discord.services.discord.listeners.buttonlisteners.impl.CancelProductPaymentImpl;
+import com.microservice.discord.services.discord.listeners.buttonlisteners.impl.GenerateProductPaymentImpl;
+import com.microservice.discord.services.discord.listeners.menulisteners.BaseMenuListener;
+import com.microservice.discord.services.discord.listeners.menulisteners.impl.SelectProductMenuImpl;
 import com.microservice.discord.services.discord.listeners.modallisteners.BaseModalListener;
-import com.microservice.discord.services.discord.listeners.modallisteners.impl.AuthorizeModalListener;
+import com.microservice.discord.services.discord.listeners.modallisteners.impl.AuthorizeModalImpl;
+import com.microservice.discord.services.discord.listeners.modallisteners.impl.PaymentModalImpl;
 import com.microservice.discord.services.discord.listeners.slashcommands.BaseSlashCommand;
-import com.microservice.discord.services.discord.listeners.slashcommands.impl.AuthorizeSlashCommand;
+import com.microservice.discord.services.discord.listeners.slashcommands.impl.AuthorizeSlashCommandImpl;
+import com.microservice.discord.services.discord.listeners.slashcommands.impl.ProductMenuSlashCommandImpl;
 import net.dv8tion.jda.api.events.guild.GuildJoinEvent;
 import net.dv8tion.jda.api.events.guild.GuildReadyEvent;
 import net.dv8tion.jda.api.events.interaction.ModalInteractionEvent;
 import net.dv8tion.jda.api.events.interaction.command.SlashCommandInteractionEvent;
+import net.dv8tion.jda.api.events.interaction.component.ButtonInteractionEvent;
+import net.dv8tion.jda.api.events.interaction.component.StringSelectInteractionEvent;
 import net.dv8tion.jda.api.hooks.ListenerAdapter;
 import org.jetbrains.annotations.NotNull;
 
@@ -19,11 +27,18 @@ public class GeneralListener extends ListenerAdapter {
 
     private final List<BaseListener<?>> baseListeners;
 
-    public GeneralListener(AuthorizeServiceProducer authorizeServiceProducer) {
+    public GeneralListener() {
         this.baseListeners = Arrays.asList(
-                new AuthorizeSlashCommand(),
+                new AuthorizeSlashCommandImpl(),
+                new ProductMenuSlashCommandImpl(),
 
-                new AuthorizeModalListener(authorizeServiceProducer)
+                new AuthorizeModalImpl(),
+                new PaymentModalImpl(),
+
+                new SelectProductMenuImpl(),
+
+                new GenerateProductPaymentImpl(),
+                new CancelProductPaymentImpl()
         );
     }
 
@@ -43,6 +58,46 @@ public class GeneralListener extends ListenerAdapter {
                 .filter(cmd -> cmd instanceof BaseSlashCommand)
                 .map(cmd -> (BaseSlashCommand) cmd)
                 .forEach(cmd -> event.getGuild().upsertCommand(cmd.getName(), cmd.getDescription()).queue());
+    }
+
+    @Override
+    public void onButtonInteraction(ButtonInteractionEvent event) {
+        baseListeners.stream()
+                .filter(button -> button instanceof BaseButtonListener)
+                .map(button -> (BaseButtonListener) button)
+                .filter(button -> event.getButton().getId().startsWith(button.getId()))
+                .findFirst()
+                .ifPresentOrElse(button -> {
+                    if (button.getPermission() != null) {
+                        if (!event.getMember().hasPermission(button.getPermission())) {
+                            // mensagem de erro sem permissao
+                            return;
+                        }
+                    }
+                    button.execute(event);
+                }, () -> {
+                    // retorne mensagem de erro
+                });
+    }
+
+    @Override
+    public void onStringSelectInteraction(StringSelectInteractionEvent event) {
+        baseListeners.stream()
+                .filter(menu -> menu instanceof BaseMenuListener)
+                .map(menu -> (BaseMenuListener) menu)
+                .filter(menu -> menu.getId().equals(event.getSelectMenu().getId()))
+                .findFirst()
+                .ifPresentOrElse(menu -> {
+                    if (menu.getPermission() != null) {
+                        if (!event.getMember().hasPermission(menu.getPermission())) {
+                            // mensagem de erro sem permissao
+                            return;
+                        }
+                    }
+                    menu.execute(event);
+                }, () -> {
+                    // retorne mensagem de erro
+                });
     }
 
     @Override
@@ -73,9 +128,11 @@ public class GeneralListener extends ListenerAdapter {
                 .filter(modal -> modal.getId().startsWith(identifier))
                 .findFirst()
                 .ifPresentOrElse(modal -> {
-                    if (!event.getMember().hasPermission(modal.getPermission())) {
-                        // mensagem de erro sem permissao
-                        return;
+                    if (modal.getPermission() != null) {
+                        if (!event.getMember().hasPermission(modal.getPermission())) {
+                            // mensagem de erro sem permissao
+                            return;
+                        }
                     }
                     modal.execute(event);
                 }, () -> {
