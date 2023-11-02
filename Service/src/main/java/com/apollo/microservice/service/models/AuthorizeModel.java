@@ -4,6 +4,7 @@ import com.apollo.microservice.service.dtos.AuthorizeDTO;
 import com.apollo.microservice.service.enums.AuthStatus;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
+import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 import org.springframework.beans.BeanUtils;
@@ -12,6 +13,7 @@ import java.util.Calendar;
 
 @Data
 @Entity
+@Builder
 @AllArgsConstructor
 @NoArgsConstructor
 @Table(name = "service_auth")
@@ -29,6 +31,12 @@ public class AuthorizeModel {
 
     @Column
     private String discordId;
+
+    @Column
+    private String categoryId;
+
+    @Column
+    private String chatId;
 
     @Column
     private String authorizeUrl;

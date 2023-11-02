@@ -22,13 +22,17 @@ public class AuthorizeModel {
 
     private String discordId;
 
+    private String categoryId;
+
+    private String chatId;
+
     private String authorizeUrl;
 
     private String accessToken;
 
     private AuthStatus authStatus;
 
-    private Calendar expirateAt;
+    private String expirateAt;
 
     public AuthorizeModel(AuthorizeDTO authorizeDTO) {
         BeanUtils.copyProperties(authorizeDTO, this);
