@@ -24,6 +24,13 @@ public class ServicePaymentProducer {
     @Value(value = "${broker.queue.payment.name}")
     private String routingKey;
 
+    @Value(value = "${broker.queue.service.payment}")
+    public String discordRoutingKey;
+
+    public void publishDiscordPaymentMessage(PaymentModel paymentModel) {
+        rabbitTemplate.convertAndSend("", discordRoutingKey, paymentModel);
+    }
+
     public void publishCreatePaymentMessage(PaymentModel paymentModel) {
         var product = productRepository.findById(paymentModel.getProductId()).orElse(null);
 
@@ -33,6 +40,7 @@ public class ServicePaymentProducer {
                 paymentModel.getId(),
                 paymentModel.getPayer(),
                 product.getServiceId(),
+                paymentModel.getChatId(),
                 paymentModel.getAccessToken(),
                 paymentModel.getCoupon() != null ? paymentModel.getCoupon() : null,
                 paymentModel.getPaymentStatus(),
