@@ -40,6 +40,9 @@ public class PaymentModel {
     private String serviceId;
 
     @Column
+    private String chatId;
+
+    @Column
     private String payer;
 
     @Column
