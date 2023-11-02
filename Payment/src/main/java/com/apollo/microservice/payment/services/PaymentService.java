@@ -2,12 +2,10 @@ package com.apollo.microservice.payment.services;
 
 import com.apollo.microservice.payment.enums.PaymentIntent;
 import com.apollo.microservice.payment.enums.PaymentStatus;
-import com.apollo.microservice.payment.models.AuthorizeModel;
 import com.apollo.microservice.payment.models.PaymentModel;
 import com.apollo.microservice.payment.producers.ServicePaymentProducer;
 import com.apollo.microservice.payment.repositories.PaymentRepository;
 import com.mercadopago.MercadoPagoConfig;
-import com.mercadopago.client.oauth.OauthClient;
 import com.mercadopago.client.payment.PaymentClient;
 import com.mercadopago.client.payment.PaymentCreateRequest;
 import com.mercadopago.client.payment.PaymentPayerRequest;
@@ -26,11 +24,11 @@ import java.util.concurrent.TimeUnit;
 @Service
 public class PaymentService {
 
-    private static final String APP_ID = "APP_ID";
+    private static final String APP_ID = "5221114361860271";
 
-    private static final String REDIRECT_URL = "REDIRECT_URL";
+    private static final String REDIRECT_URL = "https://service.apollodiscord.com";
 
-    private static final String ACCESS_TOKEN = "ACCESS_TOKEN";
+    private static final String ACCESS_TOKEN = "APP_USR-5221114361860271-092410-1e60ee4d56797285791a0d9145f917fa-1187350395";
 
     @Autowired
     private ServicePaymentProducer servicePaymentProducer;
@@ -74,24 +72,6 @@ public class PaymentService {
             System.err.println(e.getApiResponse().getContent());
             return null;
         } catch (MPException e) {
-            throw new RuntimeException(e);
-        }
-    }
-
-    public String generateAuthorizationUrl(AuthorizeModel authorizeModel) {
-        var client = new OauthClient();
-
-        try {
-            var authorizationUrl = client.getAuthorizationURL(
-                    APP_ID,
-                    REDIRECT_URL,
-                    MPRequestOptions.builder()
-                            .accessToken(ACCESS_TOKEN)
-                            .build()
-            );
-
-            return authorizationUrl + "&state=" + authorizeModel.getServiceId();
-        } catch (MPException | MPApiException e) {
             throw new RuntimeException(e);
         }
     }
