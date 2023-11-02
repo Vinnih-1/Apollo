@@ -12,15 +12,19 @@ spring:
     password: 30122003
   rabbitmq:
     addresses: amqps://ekwvjomf:s-sKR3MLT-nO2IoiGseI50e6jCkdvDKJ@jackal.rmq.cloudamqp.com/ekwvjomf
+  main:
+    allow-circular-references: true
 
 broker:
   queue:
     service:
       name: default.service
+      payment: product.payment
     payment:
       name: default.payment
     discord:
-      name: default.discord
+      request: payment.request
+      response: payment.response
     auth:
       discord: auth.discord
       service: auth.service

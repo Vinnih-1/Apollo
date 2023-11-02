@@ -19,8 +19,10 @@ broker:
   queue:
     discord:
       name: default.discord
+      request: auth.service
     service:
       name: default.service
+      payment: product.payment
     auth:
       discord: auth.discord
       service: auth.service
