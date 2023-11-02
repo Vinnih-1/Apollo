@@ -12,15 +12,8 @@ public class PaymentAuthorizeProducer {
     @Autowired
     private RabbitTemplate rabbitTemplate;
 
-    @Value(value = "${broker.queue.auth.payment}")
-    private String paymentRoutingKey;
-
     @Value(value = "${broker.queue.auth.service}")
     private String discordRoutingKey;
-
-    public void publishPaymentAuthorizeRequest(AuthorizeModel authorizeModel) {
-        rabbitTemplate.convertAndSend("", paymentRoutingKey, authorizeModel);
-    }
 
     public void publishPaymentAuthorizeResponse(AuthorizeModel authorizeModel) {
         rabbitTemplate.convertAndSend("", discordRoutingKey, authorizeModel);
