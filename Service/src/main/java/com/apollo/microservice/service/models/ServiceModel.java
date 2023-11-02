@@ -30,6 +30,9 @@ public class ServiceModel {
     private String discordId;
 
     @Column
+    private String categoryId;
+
+    @Column
     private String accessToken;
 
     @Column
