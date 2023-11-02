@@ -10,4 +10,8 @@ public interface ServiceRepository extends JpaRepository<ServiceModel, String> {
     Optional<ServiceModel> findByOwner(String owner);
 
     Optional<ServiceModel> findByServiceKey(String serviceKey);
+
+    Optional<ServiceModel> findByDiscordId(String discordId);
+
+    boolean existsByServiceKey(String serviceKey);
 }
