@@ -32,7 +32,7 @@ public class AuthorizeServiceConsumer {
     @RabbitListener(queues =  "${broker.queue.auth.service}")
     public void listenAuthorizeServiceQueue(@Payload AuthorizeModel authorizeModel) {
         var guild = discordService.getJda().getGuildById(authorizeModel.getDiscordId().split("_")[0]);
-        var channel = guild.getTextChannelById(authorizeModel.getDiscordId().split("_")[1]);
+        var channel = guild.getTextChannelById(authorizeModel.getChatId());
 
         events.stream()
                 .filter(event -> event.getAuthStatus() == authorizeModel.getAuthStatus())
