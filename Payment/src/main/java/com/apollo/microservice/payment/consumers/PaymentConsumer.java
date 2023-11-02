@@ -37,6 +37,7 @@ public class PaymentConsumer {
                 .serviceId(paymentDTO.serviceId())
                 .productId(paymentDTO.productId())
                 .id(paymentDTO.id())
+                .chatId(paymentDTO.chatId())
                 .createAt(Calendar.getInstance())
                 .accessToken(paymentDTO.accessToken())
                 .expirateAt(expirateAt)
