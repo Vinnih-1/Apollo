@@ -5,9 +5,11 @@ import com.apollo.microservice.service.consumers.events.PaymentCreatedEvent;
 import com.apollo.microservice.service.consumers.events.PaymentExpiredEvent;
 import com.apollo.microservice.service.consumers.events.PaymentSuccessEvent;
 import com.apollo.microservice.service.models.PaymentModel;
+import com.apollo.microservice.service.producers.ServicePaymentProducer;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.springframework.amqp.rabbit.annotation.RabbitListener;
 import org.springframework.amqp.support.converter.Jackson2JsonMessageConverter;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.messaging.handler.annotation.Payload;
 import org.springframework.stereotype.Component;
@@ -17,6 +19,9 @@ import java.util.List;
 
 @Component
 public class ServicePaymentConsumer {
+
+    @Autowired
+    private ServicePaymentProducer servicePaymentProducer;
 
     private final List<BasePaymentEvent> events = Arrays.asList(
             new PaymentSuccessEvent(),
@@ -30,6 +35,8 @@ public class ServicePaymentConsumer {
                 .filter(event -> event.getEvent().equals(paymentModel.getPaymentStatus().getName()))
                 .findFirst()
                 .ifPresent(event -> event.execute(paymentModel));
+
+        servicePaymentProducer.publishDiscordPaymentMessage(paymentModel);
     }
 
     @Bean
