@@ -1,6 +1,7 @@
 package com.apollo.microservice.service.controllers;
 
 import com.apollo.microservice.service.enums.AuthStatus;
+import com.apollo.microservice.service.models.AuthorizeModel;
 import com.apollo.microservice.service.models.ServiceModel;
 import com.apollo.microservice.service.producers.PaymentAuthorizeProducer;
 import com.apollo.microservice.service.repositories.AuthorizeRepository;
@@ -11,6 +12,8 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
+
+import java.util.Calendar;
 
 @RestController
 public class AuthenticationController {
@@ -26,6 +29,41 @@ public class AuthenticationController {
 
     @Autowired
     private PaymentAuthorizeProducer paymentAuthorizeProducer;
+
+    @GetMapping("/authorize")
+    public ResponseEntity<AuthorizeModel> authenticationRequest(
+            @RequestParam("serviceId") String serviceId,
+            @RequestParam("serviceKey") String serviceKey,
+            @RequestParam("discordId") String discordId,
+            @RequestParam("categoryId") String categoryId,
+            @RequestParam("chatId") String chatId
+    ) {
+        if (!serviceRepository.existsById(serviceId) && !serviceRepository.existsByServiceKey(serviceKey))
+            return ResponseEntity.badRequest().build();
+
+        var savedAuthorization = authorizeRepository.findByServiceId(serviceId).orElse(null);
+
+        if (authorizeRepository.existsByServiceId(serviceId))
+            return ResponseEntity.ok(savedAuthorization);
+
+        var expirateAt = Calendar.getInstance();
+        expirateAt.add(Calendar.MINUTE, 30);
+
+        var authorizeModel = AuthorizeModel.builder()
+                .authStatus(AuthStatus.AUTH_PENDING)
+                .serviceId(serviceId)
+                .serviceKey(serviceKey)
+                .discordId(discordId)
+                .categoryId(categoryId)
+                .chatId(chatId)
+                .expirateAt(expirateAt)
+                .build();
+
+        authorizeModel.setAuthorizeUrl(mercadoPagoService.generateAuthorizationUrl(authorizeModel));
+        authorizeRepository.saveAndFlush(authorizeModel);
+
+        return ResponseEntity.ok(authorizeModel);
+    }
 
     @GetMapping("/")
     public ResponseEntity<ServiceModel> authenticationService(
@@ -46,6 +84,7 @@ public class AuthenticationController {
                 .ifPresent(authorizeModel -> {
                     authorizeModel.setAuthStatus(AuthStatus.AUTH_SUCCESS);
                     service.setDiscordId(authorizeModel.getDiscordId());
+                    service.setCategoryId(authorizeModel.getCategoryId());
                     paymentAuthorizeProducer.publishPaymentAuthorizeResponse(authorizeModel);
                     authorizeRepository.delete(authorizeModel);
                 });
