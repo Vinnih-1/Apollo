@@ -1,7 +1,9 @@
 package com.apollo.microservice.service.controllers;
 
+import com.apollo.microservice.service.dtos.ProductDTO;
 import com.apollo.microservice.service.dtos.ServiceDTO;
 import com.apollo.microservice.service.models.ServiceModel;
+import com.apollo.microservice.service.repositories.ProductRepository;
 import com.apollo.microservice.service.repositories.ServiceRepository;
 import jakarta.validation.Valid;
 import org.apache.commons.lang3.RandomStringUtils;
@@ -17,6 +19,9 @@ public class ServiceController {
 
     @Autowired
     private ServiceRepository serviceRepository;
+
+    @Autowired
+    private ProductRepository productRepository;
 
     @PostMapping("/create")
     public ResponseEntity<ServiceModel> createService(@Valid @RequestBody ServiceDTO serviceDTO) {
@@ -64,5 +69,62 @@ public class ServiceController {
         serviceRepository.saveAndFlush(service);
 
         return ResponseEntity.ok(service);
+    }
+
+    @GetMapping("/{id}")
+    public ResponseEntity<ServiceDTO> getServiceByServiceId(@PathVariable(value = "id") String id) {
+        var service = serviceRepository.findById(id).orElse(null);
+
+        if (service == null)
+            return ResponseEntity.badRequest().build();
+
+        var products = productRepository.findProductsByServiceId(service.getId()).orElse(null)
+                .stream()
+                .map(product -> new ProductDTO(
+                        product.getId(),
+                        product.getName(),
+                        product.getDescription(),
+                        product.getPrice(),
+                        service.getId())
+                ).toList();
+
+        var serviceDto = new ServiceDTO(
+                service.getId(),
+                service.getOwner(),
+                service.getDiscordId(),
+                service.getCategoryId(),
+                null,
+                products
+        );
+
+        return ResponseEntity.ok(serviceDto);
+    }
+    @GetMapping("/discord/{id}")
+    public ResponseEntity<ServiceDTO> getServiceByDiscordId(@PathVariable(value = "id") String id) {
+        var service = serviceRepository.findByDiscordId(id).orElse(null);
+
+        if (service == null)
+            return ResponseEntity.badRequest().build();
+
+        var products = productRepository.findProductsByServiceId(service.getId()).orElse(null)
+                .stream()
+                .map(product -> new ProductDTO(
+                        product.getId(),
+                        product.getName(),
+                        product.getDescription(),
+                        product.getPrice(),
+                        service.getId())
+                ).toList();
+
+        var serviceDto = new ServiceDTO(
+                service.getId(),
+                service.getOwner(),
+                service.getDiscordId(),
+                service.getCategoryId(),
+                null,
+                products
+        );
+
+        return ResponseEntity.ok(serviceDto);
     }
 }
