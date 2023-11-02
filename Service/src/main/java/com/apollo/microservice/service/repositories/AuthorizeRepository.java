@@ -8,4 +8,6 @@ import java.util.Optional;
 public interface AuthorizeRepository extends JpaRepository<AuthorizeModel, String> {
 
     Optional<AuthorizeModel> findByServiceId(String serviceId);
+
+    boolean existsByServiceId(String serviceId);
 }
