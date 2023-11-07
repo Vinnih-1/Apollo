@@ -3,7 +3,7 @@ server:
 
 eureka:
   instance:
-    name: Eureka
+    appname: Eureka
   client:
     registry-with-eureka: false
     fetch-registry: false
