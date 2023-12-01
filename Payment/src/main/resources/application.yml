@@ -2,6 +2,8 @@ server:
   port: 8081
 
 spring:
+  application:
+    name: payment
   jpa:
     show-sql: true
     hibernate:
@@ -15,12 +17,11 @@ spring:
   main:
     allow-circular-references: true
 
-broker:
-  queue:
-    payment:
-      name: default.payment
-    service:
-      name: default.service
-    auth:
-      payment: auth.payment
-      result: auth.result
+eureka:
+  instance:
+    appname: payment
+  client:
+    registry-with-eureka: true
+    fetch-registry: true
+    service-url:
+      defaultZone: http://localhost:8084/eureka
