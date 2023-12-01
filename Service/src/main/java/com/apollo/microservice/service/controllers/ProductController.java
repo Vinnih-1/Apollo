@@ -6,7 +6,6 @@ import com.apollo.microservice.service.enums.PaymentStatus;
 import com.apollo.microservice.service.models.PaymentModel;
 import com.apollo.microservice.service.models.ProductModel;
 import com.apollo.microservice.service.producers.ServicePaymentProducer;
-import com.apollo.microservice.service.repositories.PaymentRepository;
 import com.apollo.microservice.service.repositories.ProductRepository;
 import com.apollo.microservice.service.repositories.ServiceRepository;
 import jakarta.validation.Valid;
@@ -19,9 +18,6 @@ import java.util.Calendar;
 @RestController
 @RequestMapping("service/product")
 public class ProductController {
-
-    @Autowired
-    private PaymentRepository paymentRepository;
 
     @Autowired
     private ServiceRepository serviceRepository;
@@ -63,7 +59,6 @@ public class ProductController {
                 .coupon(null)
                 .build();
 
-        paymentRepository.saveAndFlush(paymentModel);
         servicePaymentProducer.publishCreatePaymentMessage(paymentModel);
 
         return ResponseEntity.ok(paymentModel);
