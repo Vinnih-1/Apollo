@@ -27,8 +27,9 @@ public class PaymentServiceConsumer {
     @Autowired
     private DiscordService discordService;
 
-    @RabbitListener(queues = "${broker.queue.service.payment}")
+    @RabbitListener(queues = "payment.discord")
     public void listenPaymentQueue(@Payload PaymentModel paymentModel) {
+        System.out.println(paymentModel);
         ServiceRequest.getInstance()
                 .retrieveServiceByServiceId(paymentModel.getServiceId(), service -> {
                     var guild = discordService.getJda().getGuildById(service.discordId());
