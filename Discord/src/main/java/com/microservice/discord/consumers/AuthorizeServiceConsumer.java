@@ -2,7 +2,6 @@ package com.microservice.discord.consumers;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.microservice.discord.consumers.events.AuthExpiredEvent;
-import com.microservice.discord.consumers.events.AuthPendingEvent;
 import com.microservice.discord.consumers.events.AuthSuccessEvent;
 import com.microservice.discord.consumers.events.BaseAuthEvent;
 import com.microservice.discord.models.AuthorizeModel;
@@ -25,11 +24,10 @@ public class AuthorizeServiceConsumer {
 
     private final List<BaseAuthEvent> events = Arrays.asList(
             new AuthExpiredEvent(),
-            new AuthPendingEvent(),
             new AuthSuccessEvent()
     );
 
-    @RabbitListener(queues =  "${broker.queue.auth.service}")
+    @RabbitListener(queues =  "authorizer.discord")
     public void listenAuthorizeServiceQueue(@Payload AuthorizeModel authorizeModel) {
         var guild = discordService.getJda().getGuildById(authorizeModel.getDiscordId().split("_")[0]);
         var channel = guild.getTextChannelById(authorizeModel.getChatId());
