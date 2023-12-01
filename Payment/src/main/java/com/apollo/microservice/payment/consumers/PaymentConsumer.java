@@ -23,7 +23,7 @@ public class PaymentConsumer {
     @Autowired
     private PaymentService paymentService;
 
-    @RabbitListener(queues = "${broker.queue.payment.name}")
+    @RabbitListener(queues = "producer.payment")
     public void listenPaymentQueue(@Payload PaymentDTO paymentDTO) {
         var expirateAt = Calendar.getInstance();
         expirateAt.add(Calendar.MINUTE, 30);
