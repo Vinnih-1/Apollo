@@ -2,6 +2,8 @@ server:
   port: 8083
 
 spring:
+  application:
+    name: discord
   jpa:
     show-sql: true
     hibernate:
@@ -15,14 +17,11 @@ spring:
   main:
     allow-circular-references: true
 
-broker:
-  queue:
-    discord:
-      name: default.discord
-      request: auth.service
-    service:
-      name: default.service
-      payment: product.payment
-    auth:
-      discord: auth.discord
-      service: auth.service
+eureka:
+  instance:
+    appname: discord
+  client:
+    registry-with-eureka: true
+    fetch-registry: true
+    service-url:
+      defaultZone: http://localhost:8084/eureka
