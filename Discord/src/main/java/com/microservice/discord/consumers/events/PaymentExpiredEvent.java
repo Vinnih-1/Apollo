@@ -17,6 +17,8 @@ public class PaymentExpiredEvent extends BasePaymentEvent {
     public void execute(Guild guild, PaymentModel paymentModel) {
         var channel = guild.getTextChannelById(paymentModel.getChatId());
 
+        if (channel == null) return;
+
         channel.getIterableHistory().stream()
                 .filter(message -> message.getAuthor().isBot())
                 .filter(message -> !message.getAttachments().isEmpty())
