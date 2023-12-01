@@ -24,7 +24,7 @@ public class ServiceController {
     private ProductRepository productRepository;
 
     @PostMapping("/create")
-    public ResponseEntity<ServiceModel> createService(@Valid @RequestBody ServiceDTO serviceDTO) {
+    public ResponseEntity<ServiceModel> createService(@Valid @RequestBody ServiceDTO serviceDTO, @RequestHeader("Authorization") String token) {
         if (serviceRepository.findByOwner(serviceDTO.owner()).isPresent())
             return ResponseEntity.badRequest().header("Error-Message", "Este usuário já tem um serviço!").build();
 
