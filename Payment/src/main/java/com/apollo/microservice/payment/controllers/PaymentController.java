@@ -15,7 +15,7 @@ import org.springframework.web.bind.annotation.RestController;
 import java.util.Calendar;
 
 @RestController
-@RequestMapping("payment/service")
+@RequestMapping("/payment/service")
 public class PaymentController {
 
     @Autowired
