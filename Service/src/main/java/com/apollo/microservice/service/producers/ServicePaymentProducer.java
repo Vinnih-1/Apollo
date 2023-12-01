@@ -6,7 +6,6 @@ import com.apollo.microservice.service.repositories.CouponRepository;
 import com.apollo.microservice.service.repositories.ProductRepository;
 import org.springframework.amqp.rabbit.core.RabbitTemplate;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
 @Component
@@ -20,16 +19,6 @@ public class ServicePaymentProducer {
 
     @Autowired
     private ProductRepository productRepository;
-
-    @Value(value = "${broker.queue.payment.name}")
-    private String routingKey;
-
-    @Value(value = "${broker.queue.service.payment}")
-    public String discordRoutingKey;
-
-    public void publishDiscordPaymentMessage(PaymentModel paymentModel) {
-        rabbitTemplate.convertAndSend("", discordRoutingKey, paymentModel);
-    }
 
     public void publishCreatePaymentMessage(PaymentModel paymentModel) {
         var product = productRepository.findById(paymentModel.getProductId()).orElse(null);
@@ -49,6 +38,6 @@ public class ServicePaymentProducer {
                 paymentModel.getProductId()
                 );
 
-        rabbitTemplate.convertAndSend("", routingKey, paymentDTO);
+        rabbitTemplate.convertAndSend("", "producer.payment", paymentDTO);
     }
 }
