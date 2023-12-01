@@ -1,2 +1,4 @@
-package com.apollo.microservice.authentication.dtos;public record LoginDTO() {
+package com.apollo.microservice.authentication.dtos;
+
+public record AuthenticationDTO(String email, String password) {
 }
