@@ -3,11 +3,13 @@ package com.microservice.discord.services.discord.listeners.menulisteners.impl;
 import com.microservice.discord.messages.ProductMessages;
 import com.microservice.discord.requests.ServiceRequest;
 import com.microservice.discord.services.discord.listeners.menulisteners.BaseMenuListener;
+import net.dv8tion.jda.api.EmbedBuilder;
 import net.dv8tion.jda.api.Permission;
 import net.dv8tion.jda.api.entities.emoji.Emoji;
 import net.dv8tion.jda.api.events.interaction.component.StringSelectInteractionEvent;
 import net.dv8tion.jda.api.interactions.components.buttons.Button;
 
+import java.awt.*;
 import java.util.ArrayList;
 import java.util.Arrays;
 
@@ -32,8 +34,15 @@ public class SelectProductMenuImpl extends BaseMenuListener {
 
         ServiceRequest.getInstance()
                 .retrieveServiceByDiscordId(event.getGuild().getId(), service -> {
+                    if (service == null) {
+                        event.getChannel().sendMessageEmbeds(new EmbedBuilder()
+                                        .setColor(Color.RED)
+                                        .setDescription("Este discord não está vinculado a nenhum serviço!")
+                                        .build())
+                                .queue();
+                        return;
+                    }
                     var category = service.categoryId();
-
                     if (event.getGuild().getCategoryById(category) == null) {
                         event.getChannel().asTextChannel().sendMessageEmbeds(ProductMessages.CATEGORY_NOT_FOUND().build()).queue();
                         return;
