@@ -1,1 +1,34 @@
+server:
+  port: 8080
 
+spring:
+  application:
+    name: gateway
+  cloud:
+    gateway:
+      routes:
+        - id: authentication
+          uri: lb://authentication
+          predicates:
+            - Path=/auth/**
+          filters:
+            - name: AuthorizationFilter
+        - id: service
+          uri: lb://service
+          predicates:
+            - Path=/service/**
+          filters:
+            - name: AuthorizationFilter
+        - id: payment
+          uri: lb://payment
+          predicates:
+            - Path=/payment/**
+
+eureka:
+  instance:
+    appname: gateway
+  client:
+    registry-with-eureka: true
+    fetch-registry: true
+    service-url:
+      defaultZone: http://localhost:8084/eureka
