@@ -16,10 +16,12 @@ public class PaymentPendingEvent extends BasePaymentEvent {
 
     @Override
     public void execute(Guild guild, PaymentModel paymentModel) {
+        if (paymentModel.getQrcodeBase64() == null) return;
+
         guild.getTextChannelById(paymentModel.getChatId())
                 .sendMessageEmbeds(ProductMessages.PAYMENT_PENDING_EMBED(paymentModel).build())
                 .addFiles(FileUpload.fromData(Base64.getDecoder().decode(paymentModel.getQrcodeBase64()),
-                        String.format("qrcode_%s.png", paymentModel.getExternalReference())))
+                        String.format("qrcode_%s.png", paymentModel.getId())))
                 .queue();
     }
 }
