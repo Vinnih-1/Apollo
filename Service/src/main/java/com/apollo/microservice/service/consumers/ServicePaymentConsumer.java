@@ -1,11 +1,8 @@
 package com.apollo.microservice.service.consumers;
 
-import com.apollo.microservice.service.consumers.events.BasePaymentEvent;
-import com.apollo.microservice.service.consumers.events.PaymentCreatedEvent;
-import com.apollo.microservice.service.consumers.events.PaymentExpiredEvent;
-import com.apollo.microservice.service.consumers.events.PaymentSuccessEvent;
 import com.apollo.microservice.service.models.PaymentModel;
 import com.apollo.microservice.service.producers.ServicePaymentProducer;
+import com.apollo.microservice.service.repositories.PaymentRepository;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.springframework.amqp.rabbit.annotation.RabbitListener;
 import org.springframework.amqp.support.converter.Jackson2JsonMessageConverter;
@@ -14,29 +11,28 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.messaging.handler.annotation.Payload;
 import org.springframework.stereotype.Component;
 
-import java.util.Arrays;
-import java.util.List;
-
 @Component
 public class ServicePaymentConsumer {
 
     @Autowired
     private ServicePaymentProducer servicePaymentProducer;
 
-    private final List<BasePaymentEvent> events = Arrays.asList(
-            new PaymentSuccessEvent(),
-            new PaymentExpiredEvent(),
-            new PaymentCreatedEvent()
-    );
+    @Autowired
+    private PaymentRepository paymentRepository;
 
-    @RabbitListener(queues = "${broker.queue.service.name}")
+    @RabbitListener(queues = "payment.service")
     public void listenServicePaymentQueue(@Payload PaymentModel paymentModel) {
-        events.stream()
-                .filter(event -> event.getEvent().equals(paymentModel.getPaymentStatus().getName()))
-                .findFirst()
-                .ifPresent(event -> event.execute(paymentModel));
+        if (paymentModel.getExternalReference() == null) return;
 
-        servicePaymentProducer.publishDiscordPaymentMessage(paymentModel);
+        paymentRepository.findByExternalReference(paymentModel.getExternalReference())
+                .ifPresentOrElse(payment -> {
+                    paymentRepository.deleteByExternalReference(payment.getExternalReference());
+                    paymentRepository.save(paymentModel);
+                    System.out.println("Novo pagamento editado: " + paymentModel);
+                }, () -> {
+                    paymentRepository.save(paymentModel);
+                    System.out.println("Novo pagamento criado: " + paymentModel);
+                });
     }
 
     @Bean
