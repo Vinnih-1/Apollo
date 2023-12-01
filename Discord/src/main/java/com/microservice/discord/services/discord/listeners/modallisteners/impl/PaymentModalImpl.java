@@ -49,7 +49,7 @@ public class PaymentModalImpl extends BaseModalListener {
         );
 
         ServiceRequest.getInstance()
-                .sendPaymentRequest(paymentDTO, System.out::println);
+                .sendPaymentRequest(paymentDTO, onSuccess -> {});
         event.deferReply().closeResources().queue();
     }
 }
