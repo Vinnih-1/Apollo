@@ -46,8 +46,8 @@ public class ProductMessages {
         embed.setFooter("Pendente・Basta apontar o celular para o QRCode",
                 LOGO_URL);
 
-        embed.addField(":file_folder: **__Referência Externa__**",
-                paymentModel.getExternalReference(),
+        embed.addField(":file_folder: **__Compra gerada Por__**",
+                paymentModel.getPayer(),
                 false);
         embed.addField(":dollar: **__Preço__**",
                 "R$ " + String.valueOf(paymentModel.getPrice()).replace(".", ","),
@@ -85,7 +85,7 @@ public class ProductMessages {
                 "Aparentemente a categoria de criação de pagamentos foi deletada.",
                 false);
 
-        embed.setDescription(String.format("Para solucionar este problema, utilize o comando **/sincronizar**. \n" +
+        embed.setDescription(String.format("Para solucionar este problema, utilize o comando **/autorizar**. \n" +
                 "Caso você não tenha um serviço ativo, você pode " +
                 "adquirir um [clicando aqui](%s) \n⠀", SITE_URL));
 
@@ -121,22 +121,6 @@ public class ProductMessages {
                 " de produtos neste serviço. Crie um produto clicando no link abaixo e" +
                 " utilize o comando **/produtos**. \n⠀\n" +
                 "Você pode criar novos produtos [clicando aqui](%s)", SITE_URL));
-
-        return embed;
-    }
-
-    public static EmbedBuilder GENERATE_PAYMENT_FAILURE() {
-        var embed = getEmbedBuilder("Impossível gerar Pagamento");
-
-        embed.setFooter("Falha・Não foi possível criar este QRCode");
-
-        embed.addField(":mag_right: **__Deu algo de errado neste pagamento__**",
-                "Verifique se a chave-pix está correta no site acima",
-                false);
-
-        embed.setDescription(String.format("Não é possível criar este pagamento com a chave-pix" +
-                " deste serviço. Para consertar isso, insira uma chave-pix válida  \n⠀\n" +
-                "Você pode conferir isto [clicando aqui](%s)", SITE_URL));
 
         return embed;
     }
