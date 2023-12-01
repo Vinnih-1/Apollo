@@ -10,4 +10,6 @@ public interface AuthorizeRepository extends JpaRepository<AuthorizeModel, Strin
     Optional<AuthorizeModel> findByServiceId(String serviceId);
 
     boolean existsByServiceId(String serviceId);
+
+    void deleteByServiceId(String serviceId);
 }
