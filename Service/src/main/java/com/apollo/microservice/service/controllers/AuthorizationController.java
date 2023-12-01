@@ -10,13 +10,15 @@ import com.apollo.microservice.service.services.MercadoPagoService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import java.util.Calendar;
 
 @RestController
-public class AuthenticationController {
+@RequestMapping("/service")
+public class AuthorizationController {
 
     @Autowired
     private ServiceRepository serviceRepository;
@@ -31,20 +33,20 @@ public class AuthenticationController {
     private PaymentAuthorizeProducer paymentAuthorizeProducer;
 
     @GetMapping("/authorize")
-    public ResponseEntity<AuthorizeModel> authenticationRequest(
+    public ResponseEntity<AuthorizeModel> authorizationRequest(
             @RequestParam("serviceId") String serviceId,
             @RequestParam("serviceKey") String serviceKey,
             @RequestParam("discordId") String discordId,
             @RequestParam("categoryId") String categoryId,
             @RequestParam("chatId") String chatId
     ) {
-        if (!serviceRepository.existsById(serviceId) && !serviceRepository.existsByServiceKey(serviceKey))
+        if (!serviceRepository.existsById(serviceId) || !serviceRepository.existsByServiceKey(serviceKey))
             return ResponseEntity.badRequest().build();
 
         var savedAuthorization = authorizeRepository.findByServiceId(serviceId).orElse(null);
 
-        if (authorizeRepository.existsByServiceId(serviceId))
-            return ResponseEntity.ok(savedAuthorization);
+        if (savedAuthorization != null)
+            authorizeRepository.delete(savedAuthorization);
 
         var expirateAt = Calendar.getInstance();
         expirateAt.add(Calendar.MINUTE, 30);
@@ -65,8 +67,8 @@ public class AuthenticationController {
         return ResponseEntity.ok(authorizeModel);
     }
 
-    @GetMapping("/")
-    public ResponseEntity<ServiceModel> authenticationService(
+    @GetMapping("/validate")
+    public ResponseEntity<ServiceModel> authorizationService(
             @RequestParam("code") String code,
             @RequestParam("state") String state
     ) {
