@@ -23,7 +23,7 @@ All microservices that compose the backend of Apollo
  - - /service/authorize [this endpoint contains many request params (serviceId, serviceKey, discordId, categoryId, chatId)]
    ### After do this, you will receive a link to authorize us and will be redirected to `/service/validate` endpoint.
 
-   # Now you can sell your products, but before that you need to create a product, right?
+# Now you can sell your products, but before that you need to create a product, right?
 
 - Services:
 - - /service/product/create [product id is a required field]
