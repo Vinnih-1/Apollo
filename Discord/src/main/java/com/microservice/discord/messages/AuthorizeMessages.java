@@ -42,7 +42,7 @@ public class AuthorizeMessages {
     }
 
     public static EmbedBuilder AUTHORIZATION_EXPIRED(String serviceId) {
-        var embed = getEmbedBuilder("Erro na autorização");
+        var embed = getEmbedBuilder("Erro na Autorização");
         embed.setFooter("Falha・Não foi possível vincular sua conta a este Serviço");
 
         embed.addField(":identification_card: **__ID do Serviço__**",
@@ -51,6 +51,16 @@ public class AuthorizeMessages {
 
         embed.setDescription("A autorização aparenta ter falhado, pois o link de autorização expirou. " +
                 "Por favor, tente novamente...");
+
+        return embed;
+    }
+
+    public static EmbedBuilder UNAUTHORIZED() {
+        var embed = getEmbedBuilder("Discord não Autorizado");
+        embed.setFooter("Falha・Não encontrei nenhum serviço vinculado");
+
+        embed.setDescription("Este discord não está vinculado a nenhum serviço cadastrado! " +
+                "Por favor, utilize o comando `/autorizar` para vincular este discord.");
 
         return embed;
     }
