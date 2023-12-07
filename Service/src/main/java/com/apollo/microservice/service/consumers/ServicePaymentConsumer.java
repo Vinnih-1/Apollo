@@ -26,7 +26,7 @@ public class ServicePaymentConsumer {
 
         paymentRepository.findByExternalReference(paymentModel.getExternalReference())
                 .ifPresentOrElse(payment -> {
-                    paymentRepository.deleteByExternalReference(payment.getExternalReference());
+                    paymentRepository.deleteByExternalReference(paymentModel.getExternalReference());
                     paymentRepository.save(paymentModel);
                     System.out.println("Novo pagamento editado: " + paymentModel);
                 }, () -> {
