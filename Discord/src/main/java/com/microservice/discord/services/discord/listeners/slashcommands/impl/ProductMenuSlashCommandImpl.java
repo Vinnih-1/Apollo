@@ -1,5 +1,6 @@
 package com.microservice.discord.services.discord.listeners.slashcommands.impl;
 
+import com.microservice.discord.messages.AuthorizeMessages;
 import com.microservice.discord.messages.ProductMessages;
 import com.microservice.discord.requests.ServiceRequest;
 import com.microservice.discord.services.discord.listeners.slashcommands.BaseSlashCommand;
@@ -21,10 +22,15 @@ public class ProductMenuSlashCommandImpl extends BaseSlashCommand {
 
     @Override
     public void execute(SlashCommandInteractionEvent event) {
-        event.deferReply(true).setContent("Requisitando produtos...").queue();
+        event.deferReply(true).closeResources().queue();
 
         ServiceRequest.getInstance()
                 .retrieveServiceByDiscordId(event.getGuild().getId(), service -> {
+                    if (service == null) {
+                        event.getMessageChannel().sendMessageEmbeds(AuthorizeMessages.UNAUTHORIZED().build())
+                                .queue();
+                        return;
+                    }
                     var products = service.products();
 
                     if (products.isEmpty()) {
