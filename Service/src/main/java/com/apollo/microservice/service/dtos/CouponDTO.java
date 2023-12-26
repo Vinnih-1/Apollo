@@ -4,11 +4,24 @@ import jakarta.persistence.Column;
 import jakarta.persistence.Embeddable;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
+import lombok.AllArgsConstructor;
+import lombok.Data;
+import lombok.NoArgsConstructor;
 
+@NoArgsConstructor
+@AllArgsConstructor
 @Embeddable
-public record CouponDTO(@Column(insertable = false, updatable = false) Long couponId,
-                        @NotNull @NotBlank String name,
-                        @NotNull Integer discount,
-                        @NotNull Integer expirateDays,
-                        @Column(insertable = false, updatable = false) String serviceId) {
+@Data
+public class CouponDTO {
+
+    @Column(insertable = false, updatable = false)  private Long couponId;
+
+    @NotNull @NotBlank private String name;
+
+    @NotNull private Integer discount;
+
+    @NotNull private Integer expirateDays;
+
+    @Column(insertable = false, updatable = false) private String serviceId;
+
 }
