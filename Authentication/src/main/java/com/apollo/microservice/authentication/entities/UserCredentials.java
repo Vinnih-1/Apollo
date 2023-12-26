@@ -30,9 +30,12 @@ public class UserCredentials implements UserDetails {
     @Column
     private String password;
 
+    @Column
+    private List<SimpleGrantedAuthority> authorities;
+
     @Override
-    public Collection<? extends GrantedAuthority> getAuthorities() {
-        return List.of(new SimpleGrantedAuthority("ROLE_USER"), new SimpleGrantedAuthority("ROLE_ADMIN"));
+    public Collection<SimpleGrantedAuthority> getAuthorities() {
+        return authorities;
     }
 
     @Override
