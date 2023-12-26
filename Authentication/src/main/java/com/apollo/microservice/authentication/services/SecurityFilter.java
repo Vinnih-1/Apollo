@@ -28,7 +28,7 @@ public class SecurityFilter extends OncePerRequestFilter {
 
         if (authozationHeader != null && authozationHeader.startsWith("Bearer ")) {
             var token = authozationHeader.substring(7);
-            var email = tokenService.getSubject(token);
+            var email = tokenService.getEmailSubject(token);
             var userCredential = userCredentialsRepository.findByEmail(email).orElse(null);
 
             if (userCredential == null) {
