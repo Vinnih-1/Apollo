@@ -1,84 +1,104 @@
 package com.apollo.microservice.service.controllers;
 
+import com.apollo.microservice.service.clients.UserClient;
+import com.apollo.microservice.service.dtos.Authority;
 import com.apollo.microservice.service.dtos.ProductDTO;
 import com.apollo.microservice.service.dtos.ServiceDTO;
+import com.apollo.microservice.service.enums.PaymentStatus;
+import com.apollo.microservice.service.enums.ServiceType;
+import com.apollo.microservice.service.models.PaymentModel;
 import com.apollo.microservice.service.models.ServiceModel;
-import com.apollo.microservice.service.repositories.ProductRepository;
-import com.apollo.microservice.service.repositories.ServiceRepository;
-import jakarta.validation.Valid;
-import org.apache.commons.lang3.RandomStringUtils;
+import com.apollo.microservice.service.services.PlanService;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.client.RestTemplate;
 
-import java.util.Calendar;
+import java.util.List;
 
 @RestController
 @RequestMapping("service")
 public class ServiceController {
 
     @Autowired
-    private ServiceRepository serviceRepository;
+    private RestTemplate restTemplate;
 
     @Autowired
-    private ProductRepository productRepository;
+    private UserClient userClient;
 
-    @PostMapping("/create")
-    public ResponseEntity<ServiceModel> createService(@Valid @RequestBody ServiceDTO serviceDTO, @RequestHeader("Authorization") String token) {
-        if (serviceRepository.findByOwner(serviceDTO.owner()).isPresent())
-            return ResponseEntity.badRequest().header("Error-Message", "Este usuário já tem um serviço!").build();
+    @Autowired
+    private PlanService planService;
 
-        var calendar = Calendar.getInstance();
-        calendar.add(Calendar.DAY_OF_MONTH, 30);
+    @GetMapping("/")
+    public ResponseEntity<ServiceDTO> getServiceByToken(@RequestHeader("Authorization") String token) {
+        var user = userClient.validateToken(token.substring(7));
+        if (!user.isValid()) return ResponseEntity.badRequest().build();
+        var service = planService.findByOwner(user.getEmail());
+        if (service == null) return ResponseEntity.ok(new ServiceDTO());
+        var serviceDto = new ServiceDTO(
+                service.getId(),
+                service.getServiceKey(),
+                service.getOwner(),
+                service.getDiscordId(),
+                service.getCategoryId(),
+                ServiceType.PROFESSIONAL,
+                planService.getPaymentsFromService(service.getId()).size(),
+                planService.getPaymentsFromService(service.getId()).stream()
+                        .mapToDouble(PaymentModel::getPrice)
+                        .sum(),
+                planService.getProductsFromService(service.getId()).stream()
+                        .map(product -> new ProductDTO(
+                                product.getId(),
+                                product.getName(),
+                                product.getDescription(),
+                                product.getPrice(),
+                                service.getId())
+                        ).toList()
+        );
 
-        var service = ServiceModel.builder()
-                .owner(serviceDTO.owner())
-                .serviceKey(RandomStringUtils.randomAlphanumeric(8))
-                .discordId(serviceDTO.discordId())
-                .createAt(Calendar.getInstance())
-                .expirateAt(calendar)
-                .isSuspended(false)
-                .build();
+        return ResponseEntity.ok(serviceDto);
+    }
 
-        serviceRepository.saveAndFlush(service);
+    @GetMapping("/email/")
+    public ResponseEntity<ServiceModel> getServiceByOwner(@RequestParam("owner") String owner, @RequestHeader("Authorization") String token) {
+        var user = userClient.validateToken(token.substring(7));
+
+        if (!user.getAuthorities().contains(new Authority("ROLE_ADMIN"))) {
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
+        }
+        var service = planService.findByOwner(owner);
+        if (service == null) return ResponseEntity.ok(new ServiceModel());
 
         return ResponseEntity.ok(service);
     }
 
-    @PutMapping("/edit")
-    public ResponseEntity<ServiceModel> editService(@Valid @RequestBody ServiceDTO serviceDTO) {
-        var service = serviceRepository.findById(serviceDTO.serviceId()).orElse(null);
+    @GetMapping("/plans")
+    public ResponseEntity<Page<ServiceModel>> getPageableServices(@RequestParam("page") int page, @RequestHeader("Authorization") String token) {
+        var user = userClient.validateToken(token.substring(7));
 
-        if (service == null)
-            return ResponseEntity.badRequest().header("Error-Message", "Este serviço não foi encontrado!").build();
-
-        service.setDiscordId(serviceDTO.discordId());
-        serviceRepository.saveAndFlush(service);
-
-        return ResponseEntity.ok(service);
+        if (!user.getAuthorities().contains(new Authority("ROLE_ADMIN"))) {
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
+        }
+        return ResponseEntity.ok(planService.getPageableServices(PageRequest.of(page, 20)));
     }
 
-    @PutMapping("/suspend")
-    public ResponseEntity<ServiceModel> suspendService(@Valid @RequestBody ServiceDTO serviceDTO) {
-        var service = serviceRepository.findById(serviceDTO.serviceId()).orElse(null);
-
-        if (service == null)
-            return ResponseEntity.badRequest().header("Error-Message", "Este serviço não foi encontrado!").build();
-
-        service.setSuspended(true);
-        serviceRepository.saveAndFlush(service);
-
-        return ResponseEntity.ok(service);
+    @GetMapping("/payments")
+    public ResponseEntity<List<PaymentModel>> getPaymentsService(@RequestParam("status") PaymentStatus paymentStatus, @RequestHeader("Authorization") String token) {
+        var user = userClient.userByToken(token);
+        return ResponseEntity.ok(planService.getPaymentsFromService(planService.findByOwner(user.getEmail()).getId(), paymentStatus));
     }
 
     @GetMapping("/{id}")
     public ResponseEntity<ServiceDTO> getServiceByServiceId(@PathVariable(value = "id") String id) {
-        var service = serviceRepository.findById(id).orElse(null);
+        var service = planService.findServiceById(id);
 
         if (service == null)
             return ResponseEntity.badRequest().build();
 
-        var products = productRepository.findProductsByServiceId(service.getId()).orElse(null)
+        var products = planService.getProductsFromService(service.getId())
                 .stream()
                 .map(product -> new ProductDTO(
                         product.getId(),
@@ -90,23 +110,27 @@ public class ServiceController {
 
         var serviceDto = new ServiceDTO(
                 service.getId(),
+                "",
                 service.getOwner(),
                 service.getDiscordId(),
                 service.getCategoryId(),
                 null,
+                0,
+                0,
                 products
         );
 
         return ResponseEntity.ok(serviceDto);
     }
+
     @GetMapping("/discord/{id}")
     public ResponseEntity<ServiceDTO> getServiceByDiscordId(@PathVariable(value = "id") String id) {
-        var service = serviceRepository.findByDiscordId(id).orElse(null);
+        var service = planService.findByDiscordId(id);
 
         if (service == null)
             return ResponseEntity.badRequest().build();
 
-        var products = productRepository.findProductsByServiceId(service.getId()).orElse(null)
+        var products = planService.getProductsFromService(service.getId())
                 .stream()
                 .map(product -> new ProductDTO(
                         product.getId(),
@@ -118,10 +142,13 @@ public class ServiceController {
 
         var serviceDto = new ServiceDTO(
                 service.getId(),
+                "",
                 service.getOwner(),
                 service.getDiscordId(),
                 service.getCategoryId(),
                 null,
+                0,
+                0,
                 products
         );
 
