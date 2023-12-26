@@ -1,5 +1,6 @@
 server:
   port: 8080
+  address: 192.168.1.106
 
 spring:
   application:
@@ -11,6 +12,15 @@ spring:
           uri: lb://authentication
           predicates:
             - Path=/auth/**
+          metadata:
+            cors:
+              allowedOrigins: '*'
+              allowedMethods:
+                - GET
+                - POST
+                - DELETE
+              allowedHeaders: '*'
+              maxAge: 30
           filters:
             - name: AuthorizationFilter
         - id: service
@@ -19,10 +29,32 @@ spring:
             - Path=/service/**
           filters:
             - name: AuthorizationFilter
+          metadata:
+            cors:
+              allowedOrigins: '*'
+              allowedMethods:
+                - GET
+                - POST
+                - DELETE
+              allowedHeaders: '*'
+              maxAge: 30
         - id: payment
           uri: lb://payment
           predicates:
             - Path=/payment/**
+          metadata:
+            cors:
+              allowedOrigins: '*'
+              allowedMethods:
+                - GET
+                - POST
+                - DELETE
+              allowedHeaders: '*'
+              maxAge: 30
+          filters:
+            - name: AuthorizationFilter
+  main:
+    allow-circular-references: true
 
 eureka:
   instance:
