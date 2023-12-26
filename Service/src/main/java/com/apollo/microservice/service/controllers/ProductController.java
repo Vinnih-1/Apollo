@@ -1,51 +1,49 @@
 package com.apollo.microservice.service.controllers;
 
+import com.apollo.microservice.service.clients.ServiceClient;
+import com.apollo.microservice.service.clients.UserClient;
 import com.apollo.microservice.service.dtos.ProductDTO;
 import com.apollo.microservice.service.enums.PaymentIntent;
 import com.apollo.microservice.service.enums.PaymentStatus;
 import com.apollo.microservice.service.models.PaymentModel;
 import com.apollo.microservice.service.models.ProductModel;
 import com.apollo.microservice.service.producers.ServicePaymentProducer;
-import com.apollo.microservice.service.repositories.ProductRepository;
-import com.apollo.microservice.service.repositories.ServiceRepository;
+import com.apollo.microservice.service.services.PlanService;
 import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.Calendar;
+import java.util.List;
 
 @RestController
 @RequestMapping("service/product")
 public class ProductController {
 
     @Autowired
-    private ServiceRepository serviceRepository;
-
-    @Autowired
-    private ProductRepository productRepository;
-
-    @Autowired
     private ServicePaymentProducer servicePaymentProducer;
+
+    @Autowired
+    private PlanService planService;
+
+    @Autowired
+    private UserClient userClient;
+
+    @Autowired
+    private ServiceClient serviceClient;
 
     @GetMapping("{id}/payment")
     public ResponseEntity<PaymentModel> generateProductPayment(
             @PathVariable(value = "id") Long id,
             @RequestParam("payer") String payer,
             @RequestParam("chatId") String chatId) {
-        var product = productRepository.findById(id).orElse(null);
-
-        if (product == null)
-            return ResponseEntity.badRequest().build();
-
-        var service = serviceRepository.findById(product.getServiceId()).orElse(null);
-
-        if (service == null)
-            return ResponseEntity.badRequest().build();
-
+        var product = planService.findProductById(id);
+        if (product == null) return ResponseEntity.badRequest().build();
+        var service = planService.findServiceById(product.getServiceId());
+        if (service == null) return ResponseEntity.badRequest().build();
         var expirateAt = Calendar.getInstance();
         expirateAt.add(Calendar.MINUTE, 30);
-
         var paymentModel = PaymentModel.builder()
                 .payer(payer)
                 .productId(id)
@@ -58,48 +56,31 @@ public class ProductController {
                 .accessToken(service.getAccessToken())
                 .coupon(null)
                 .build();
-
         servicePaymentProducer.publishCreatePaymentMessage(paymentModel);
-
         return ResponseEntity.ok(paymentModel);
     }
 
     @PostMapping("/create")
-    public ResponseEntity<ProductModel> createServiceProduct(@Valid @RequestBody ProductDTO productDTO) {
-        var service = serviceRepository.findById(productDTO.serviceId()).orElse(null);
+    public ResponseEntity<ProductModel> createServiceProduct(@Valid @RequestBody ProductDTO productDTO, @RequestHeader("Authorization") String token) {
+        var service = serviceClient.getServiceByToken(token);
+        if (service.getId() == null) return ResponseEntity.badRequest().build();
+        productDTO.setServiceId(service.getId());
+        return ResponseEntity.ok(planService.createNewProduct(productDTO));
+    }
 
-        if (service == null)
-            return ResponseEntity.badRequest().header("Error-Message", "Este serviço não foi encontrado").build();
-
-        var product = ProductModel.builder()
-                .name(productDTO.name())
-                .description(productDTO.description())
-                .price(productDTO.price())
-                .serviceId(productDTO.serviceId())
-                .createAt(Calendar.getInstance())
-                .build();
-
-        productRepository.saveAndFlush(product);
-        serviceRepository.saveAndFlush(service);
-
-        return ResponseEntity.status(204).body(product);
+    @GetMapping("/")
+    public ResponseEntity<List<ProductModel>> getProductsByService(@RequestHeader("Authorization") String token) {
+        var user = userClient.userByToken(token);
+        return ResponseEntity.ok(planService.getProductsFromService(planService.findByOwner(user.getEmail()).getId()));
     }
 
     @DeleteMapping("/delete")
-    public ResponseEntity<Void> deleteServiceProduct(@Valid @RequestBody ProductDTO productDTO) {
-        var service = serviceRepository.findById(productDTO.serviceId()).orElse(null);
-
-        if (service == null)
-            return ResponseEntity.badRequest().header("Error-Message", "Este serviço não foi encontrado!").build();
-
-        var product = productRepository.findById(productDTO.id()).orElse(null);
-
-        if (product == null)
-            return ResponseEntity.badRequest().header("Error-Message", "Este produto não foi encontrado!").build();
-
-        productRepository.delete(product);
-        serviceRepository.saveAndFlush(service);
-
-        return ResponseEntity.status(204).build();
+    public ResponseEntity<Void> deleteProductById(@RequestParam("id") long id, @RequestHeader("Authorization") String token) {
+        var service = serviceClient.getServiceByToken(token);
+        if (service.getProducts() == null) return ResponseEntity.badRequest().build();
+        var ownsProduct = service.getProducts().stream().anyMatch(product -> product.getId() == id);
+        if (!ownsProduct) return ResponseEntity.badRequest().build();
+        planService.deleteProductById(id);
+        return ResponseEntity.ok().build();
     }
 }
