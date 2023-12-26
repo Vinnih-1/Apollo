@@ -19,6 +19,7 @@ import org.springframework.stereotype.Service;
 import java.math.BigDecimal;
 import java.text.DecimalFormat;
 import java.util.Calendar;
+import java.util.UUID;
 import java.util.concurrent.TimeUnit;
 
 @Service
@@ -40,7 +41,9 @@ public class PaymentService {
         if (paymentModel.getAccessToken() != null && paymentModel.getPaymentIntent() == PaymentIntent.SELL_PRODUCT)
             MercadoPagoConfig.setAccessToken(paymentModel.getAccessToken());
         else
-            MercadoPagoConfig.setAccessToken(EnviromentService.getInstance().getEnv("MP_PRODUCTION_ACCESS_TOKEN"));
+            MercadoPagoConfig.setAccessToken(ACCESS_TOKEN);
+
+        var uuid = UUID.randomUUID();
 
         var request = PaymentCreateRequest.builder()
                 .installments(1)
@@ -48,7 +51,7 @@ public class PaymentService {
                 .paymentMethodId("pix")
                 .description("Serviços da Apollo")
                 .transactionAmount(BigDecimal.valueOf(paymentModel.getPrice()))
-                .externalReference(paymentModel.getId())
+                .externalReference(uuid.toString())
                 .payer(PaymentPayerRequest.builder()
                         .email(paymentModel.getPayer())
                         .build())
@@ -64,6 +67,7 @@ public class PaymentService {
             paymentModel.setQrcode(transactionData.getQrCode());
             paymentModel.setPaymentStatus(PaymentStatus.PENDING);
             paymentModel.setExternalReference(paymentModel.getId());
+            paymentModel.setExternalReference(uuid.toString());
 
             paymentRepository.saveAndFlush(paymentModel);
 
