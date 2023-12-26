@@ -17,9 +17,9 @@ public class ServiceRequest {
 
     private static ServiceRequest instance =  null;
 
-    private static final String BEARER_TOKEN = "Bearer eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJhZG1pbi1hcG9sbG8zMDEyQGdtYWlsLmNvbSIsImlzcyI6InVzZXIiLCJpZCI6ImIxNWViYzI0LTE1YWUtNDA2ZS1iODdiLWMyMGNmZWQwM2Y5ZSIsImV4cCI6MTcwMzkzNjAxM30.wI1zJ6gekHRMLulhJaQLZjHBNGqEDJLbGTfUO9r5qaY";
+    private static final String BEARER_TOKEN = "Bearer eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJ2aW5pY2l1c2FsYjEwQGdtYWlsLmNvbSIsImlzcyI6InVzZXIiLCJpZCI6ImRlNzBlM2ZlLWRmODgtNGU1MC04MjViLTNlNzIyNmI5OTZhNyIsImV4cCI6MTcwNTgxODgwNywiYXV0aG9yaXRpZXMiOlsiUk9MRV9VU0VSIl19.b8K6TUzpW2kbA9J9c3BV8nGOIaocNZh1eKl49Ww_28g";
 
-    private static final String URL = "http://localhost:8080";
+    private static final String URL = "http://192.168.1.106:8080";
 
     private final HttpClient client;
 
