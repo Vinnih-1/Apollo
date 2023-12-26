@@ -14,6 +14,8 @@ public interface PaymentRepository extends JpaRepository<PaymentModel, String> {
 
     Optional<PaymentModel> findByExternalReference(String externalReference);
 
+    Optional<List<PaymentModel>> findAllByServiceId(String serviceId);
+
     @Query("SELECT p FROM PaymentModel p WHERE p.expirateAt < ?1")
     List<PaymentModel> findExpiredPayments(Calendar currentDate);
 }
