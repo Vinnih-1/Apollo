@@ -27,7 +27,7 @@ public class TokenService {
                 ).sign(Algorithm.HMAC256(secretKey));
     }
 
-    public String getSubject(String token) {
+    public String getEmailSubject(String token) {
         return JWT.require(Algorithm.HMAC256(secretKey))
                 .withIssuer("user")
                 .build().verify(token).getSubject();
