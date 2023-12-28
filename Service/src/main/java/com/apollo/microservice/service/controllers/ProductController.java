@@ -40,7 +40,7 @@ public class ProductController {
             @RequestParam("chatId") String chatId) {
         var product = planService.findProductById(id);
         if (product == null) return ResponseEntity.badRequest().build();
-        var service = planService.findServiceById(product.getServiceId());
+        var service = planService.findServiceById(product.getService().getId());
         if (service == null) return ResponseEntity.badRequest().build();
         var expirateAt = Calendar.getInstance();
         expirateAt.add(Calendar.MINUTE, 30);
@@ -71,7 +71,8 @@ public class ProductController {
     @GetMapping("/")
     public ResponseEntity<List<ProductModel>> getProductsByService(@RequestHeader("Authorization") String token) {
         var user = userClient.userByToken(token);
-        return ResponseEntity.ok(planService.getProductsFromService(planService.findByOwner(user.getEmail()).getId()));
+        var service = planService.findByOwner(user.getEmail());
+        return ResponseEntity.ok(service.getProducts());
     }
 
     @DeleteMapping("/delete")

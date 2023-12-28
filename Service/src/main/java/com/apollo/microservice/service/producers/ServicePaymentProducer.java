@@ -28,7 +28,7 @@ public class ServicePaymentProducer {
         var paymentDTO = new PaymentDTO(
                 paymentModel.getId(),
                 paymentModel.getPayer(),
-                product.getServiceId(),
+                product.getService().getId(),
                 paymentModel.getChatId(),
                 paymentModel.getAccessToken(),
                 paymentModel.getCoupon() != null ? paymentModel.getCoupon() : null,
@@ -36,7 +36,7 @@ public class ServicePaymentProducer {
                 paymentModel.getPaymentIntent(),
                 product.getPrice(),
                 paymentModel.getProductId()
-                );
+        );
 
         rabbitTemplate.convertAndSend("", "producer.payment", paymentDTO);
     }

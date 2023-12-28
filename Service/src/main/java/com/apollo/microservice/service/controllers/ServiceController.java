@@ -49,7 +49,7 @@ public class ServiceController {
                 planService.getPaymentsFromService(service.getId()).stream()
                         .mapToDouble(PaymentModel::getPrice)
                         .sum(),
-                planService.getProductsFromService(service.getId()).stream()
+                service.getProducts().stream()
                         .map(product -> new ProductDTO(
                                 product.getId(),
                                 product.getName(),
@@ -98,7 +98,7 @@ public class ServiceController {
         if (service == null)
             return ResponseEntity.badRequest().build();
 
-        var products = planService.getProductsFromService(service.getId())
+        var products = service.getProducts()
                 .stream()
                 .map(product -> new ProductDTO(
                         product.getId(),
@@ -130,7 +130,7 @@ public class ServiceController {
         if (service == null)
             return ResponseEntity.badRequest().build();
 
-        var products = planService.getProductsFromService(service.getId())
+        var products = service.getProducts()
                 .stream()
                 .map(product -> new ProductDTO(
                         product.getId(),
