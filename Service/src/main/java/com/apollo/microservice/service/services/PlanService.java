@@ -47,10 +47,6 @@ public class PlanService {
         return serviceRepository.findAll(pageable);
     }
 
-    public List<ProductModel> getProductsFromService(String serviceId) {
-        return productRepository.findProductsByServiceId(serviceId).orElse(null);
-    }
-
     public List<CouponModel> getCouponsFromService(String serviceId) {
         return couponRepository.findCouponsByServiceId(serviceId).orElse(null);
     }
@@ -58,7 +54,7 @@ public class PlanService {
     public CouponModel createNewCoupon(CouponDTO couponDTO) {
         var calendar = Calendar.getInstance();
         calendar.add(Calendar.DAY_OF_MONTH, couponDTO.getExpirateDays());
-        var coupon =  CouponModel.builder()
+        var coupon = CouponModel.builder()
                 .name(couponDTO.getName())
                 .discount(couponDTO.getDiscount())
                 .serviceId(couponDTO.getServiceId())
@@ -79,7 +75,7 @@ public class PlanService {
                 .name(productDTO.getName().toUpperCase())
                 .description(productDTO.getDescription())
                 .price(productDTO.getPrice())
-                .serviceId(productDTO.getServiceId())
+                .service(findServiceById(productDTO.getServiceId()))
                 .createAt(Calendar.getInstance())
                 .build();
         productRepository.saveAndFlush(product);
