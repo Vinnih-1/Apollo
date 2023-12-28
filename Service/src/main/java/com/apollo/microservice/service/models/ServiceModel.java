@@ -1,19 +1,18 @@
 package com.apollo.microservice.service.models;
 
 import jakarta.persistence.*;
-import lombok.AllArgsConstructor;
-import lombok.Builder;
-import lombok.Data;
-import lombok.NoArgsConstructor;
+import lombok.*;
 
 import java.util.Calendar;
+import java.util.List;
 
-@Data
+@Setter
+@Getter
 @Builder
 @Entity
 @AllArgsConstructor
 @NoArgsConstructor
-@Table(name = "services")
+@Table(name = "tb_services")
 public class ServiceModel {
 
     @Id
@@ -25,6 +24,9 @@ public class ServiceModel {
 
     @Column(unique = true)
     private String serviceKey;
+
+    @OneToMany(mappedBy = "service", fetch = FetchType.EAGER)
+    private List<ProductModel> products;
 
     @Column
     private String discordId;

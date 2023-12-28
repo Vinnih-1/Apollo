@@ -1,19 +1,17 @@
 package com.apollo.microservice.service.models;
 
 import jakarta.persistence.*;
-import lombok.AllArgsConstructor;
-import lombok.Builder;
-import lombok.Data;
-import lombok.NoArgsConstructor;
+import lombok.*;
 
 import java.util.Calendar;
 
-@Data
+@Setter
+@Getter
 @Builder
 @Entity
 @AllArgsConstructor
 @NoArgsConstructor
-@Table(name = "products_service")
+@Table(name = "tb_products")
 public class ProductModel {
 
     @Id
@@ -26,10 +24,11 @@ public class ProductModel {
     @Column
     private double price;
 
-    @Column
-    private String serviceId;
+    @ManyToOne
+    @JoinColumn(name = "service_id")
+    private ServiceModel service;
 
-    @Column
+    @Column(length = 50)
     private String description;
 
     @Temporal(TemporalType.DATE)

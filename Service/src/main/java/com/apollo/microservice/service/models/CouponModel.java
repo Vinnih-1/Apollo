@@ -13,7 +13,7 @@ import java.util.Calendar;
 @Entity
 @AllArgsConstructor
 @NoArgsConstructor
-@Table(name = "coupons_service")
+@Table(name = "tb_coupons")
 public class CouponModel {
 
     @Id

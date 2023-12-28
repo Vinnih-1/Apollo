@@ -17,7 +17,7 @@ import java.util.Calendar;
 @Entity
 @AllArgsConstructor
 @NoArgsConstructor
-@Table(name = "selling_products")
+@Table(name = "tb_payments")
 public class PaymentModel {
 
     @Id
