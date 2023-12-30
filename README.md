@@ -1,31 +1,28 @@
-# Apollo
-All microservices that compose the backend of Apollo
+Missão atual: Fundir o microsserviço Payments com o Service
 
-# Routes
+Motivação:
 
-- Authentication:
-- - /auth/login [email and password are required fields]
-  - /auth/register [email and password are required fields]
-  - /auth/validate [this field contains only the token]
- 
-# After authentication, you need to create a service that you can sell your products.
-### You must be authenticated to use all these endpoints
+	Atualmente o microsserviço Payments não tem uma função tão complexa a ponto de ser necessário
+	o separo em outro microsserviço. A sua missão atual é receber os pedidos de geração de pagamento
+	requisitado pelo discord e acessar a API do Mercado Pago para obter o QRCode e o QRCodeBase64.
+	
+	Acredito que o sistema ficará mais simples se reduzir este microsserviço desnecessário e
+	introduzí-lo no microsserviço de serviços. Além de reduzir o número de queues necessárias
+	para a geração de pagamentos no RabbitMQ, pois, se for introduzido, conterá apenas as queues
+	de 'payment.discord' e 'producer.payment'.
 
-- Services:
-- - /service/create [owner and serviceType are required fields]
-  - /service/edit [owner and serviceType are required fields]
-  - /service/suspend [owner and serviceType are required fields]
-  - /service/{id} [the path variable contains only the service id]
-  - /service/discord/{id} [the path variable contains only the service id]
+Tarefas na cronologia correta:
 
-   ### After created your service, you need to authorize us to use your account to generate all payments directed to your Mercado Pago account.
- - Services:
- - - /service/authorize [this endpoint contains many request params (serviceId, serviceKey, discordId, categoryId, chatId)]
-   ### After do this, you will receive a link to authorize us and will be redirected to `/service/validate` endpoint.
+	- Remodelar os objetos e suas relações no banco de dados
+		- ServiceModel
+		- ProductModel
+		- CouponModel
+		- PaymentModel
 
-# Now you can sell your products, but before that you need to create a product, right?
+	- Gerar seus respectivos DTOs sem os dados sensíveis, como por exemplo: AuthorizationData
 
-- Services:
-- - /service/product/create [product id is a required field]
-  - /service/product/delete [product id is a required field]
-  - /service/product/{id}/payment [you need to supply a path variable that is the product id and two request params (payer and chatId)]
+	- Remodelar os controllers para a geração de pagamentos
+
+	- Remodelar PaymentService e introduzir o conceito de PaymentObserver para observar o status dos pagamentos gerados
+
+	- Atualizar dados do Eureka e Gateway para remoção completa do microsserviço Payments.
