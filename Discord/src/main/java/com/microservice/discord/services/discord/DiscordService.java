@@ -1,7 +1,7 @@
 package com.microservice.discord.services.discord;
 
+import com.microservice.discord.configs.DotEnv;
 import com.microservice.discord.services.discord.listeners.GeneralListener;
-import io.github.cdimascio.dotenv.Dotenv;
 import lombok.Getter;
 import net.dv8tion.jda.api.JDA;
 import net.dv8tion.jda.api.JDABuilder;
@@ -15,15 +15,15 @@ public class DiscordService {
 
     private final JDA jda;
 
+    private final GeneralListener generalListener;
+
     @Autowired
-    public DiscordService() throws InterruptedException {
-        var dotenv = Dotenv.configure()
-                .directory("../Discord/.env")
-                .load();
+    public DiscordService(GeneralListener generalListener, DotEnv dotEnv) throws InterruptedException {
+        this.generalListener = generalListener;
 
         this.jda = JDABuilder
-                .createDefault(dotenv.get("APOLLO_PRODUCTION_TOKEN_BOT"))
-                .addEventListeners(new GeneralListener())
+                .createDefault(dotEnv.get("APOLLO_PRODUCTION_TOKEN_BOT"))
+                .addEventListeners(generalListener)
                 .build()
                 .awaitReady();
 
