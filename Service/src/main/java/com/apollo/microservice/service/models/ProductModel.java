@@ -1,9 +1,12 @@
 package com.apollo.microservice.service.models;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.annotation.JsonManagedReference;
 import jakarta.persistence.*;
 import lombok.*;
 
 import java.util.Calendar;
+import java.util.List;
 
 @Setter
 @Getter
@@ -15,7 +18,7 @@ import java.util.Calendar;
 public class ProductModel {
 
     @Id
-    @GeneratedValue(strategy = GenerationType.AUTO)
+    @GeneratedValue(strategy = GenerationType.SEQUENCE)
     private Long id;
 
     @Column
@@ -24,7 +27,12 @@ public class ProductModel {
     @Column
     private double price;
 
+    @JsonIgnore
+    @OneToMany(mappedBy = "product", fetch = FetchType.LAZY)
+    private List<PaymentModel> payments;
+
     @ManyToOne
+    @JsonManagedReference
     @JoinColumn(name = "service_id")
     private ServiceModel service;
 
@@ -33,4 +41,15 @@ public class ProductModel {
 
     @Temporal(TemporalType.DATE)
     private Calendar createAt;
+
+    @Override
+    public String toString() {
+        return "ProductModel{" +
+                "id=" + id +
+                ", name='" + name + '\'' +
+                ", price=" + price +
+                ", description='" + description + '\'' +
+                ", createAt=" + createAt +
+                '}';
+    }
 }
