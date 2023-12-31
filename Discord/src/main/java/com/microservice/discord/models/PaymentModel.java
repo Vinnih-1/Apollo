@@ -1,13 +1,15 @@
 package com.microservice.discord.models;
 
 import com.microservice.discord.dtos.CouponDTO;
-import com.microservice.discord.enums.PaymentIntent;
+import com.microservice.discord.dtos.ProductDTO;
 import com.microservice.discord.enums.PaymentStatus;
-import com.microservice.discord.enums.ServiceType;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
+
+import java.util.Calendar;
+import java.util.List;
 
 @Data
 @Builder
@@ -15,17 +17,9 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 public class PaymentModel {
 
-    private String id;
-
-    private ServiceType serviceType;
+    private Long id;
 
     private PaymentStatus paymentStatus;
-
-    private PaymentIntent paymentIntent;
-
-    private double price;
-
-    private String serviceId;
 
     private String chatId;
 
@@ -33,15 +27,15 @@ public class PaymentModel {
 
     private String externalReference;
 
-    private String accessToken;
+    private ProductDTO product;
 
-    private Long productId;
+    private List<CouponDTO> coupons;
 
-    private CouponDTO coupon;
+    private AuthorizationData authorizationData;
 
-    private String createAt;
+    private Calendar createAt;
 
-    private String expirateAt;
+    private Calendar expirateAt;
 
     private String qrcode;
 
