@@ -1,7 +1,6 @@
 package com.apollo.microservice.payment.consumers;
 
 import com.apollo.microservice.payment.dtos.PaymentDTO;
-import com.apollo.microservice.payment.models.PaymentModel;
 import com.apollo.microservice.payment.producers.ServicePaymentProducer;
 import com.apollo.microservice.payment.services.PaymentService;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -28,23 +27,8 @@ public class PaymentConsumer {
         var expirateAt = Calendar.getInstance();
         expirateAt.add(Calendar.MINUTE, 30);
 
-        var paymentModel = PaymentModel.builder()
-                .paymentStatus(paymentDTO.paymentStatus())
-                .paymentIntent(paymentDTO.paymentIntent())
-                .price(paymentDTO.price())
-                .payer(paymentDTO.payer())
-                .coupon(paymentDTO.coupon())
-                .serviceId(paymentDTO.serviceId())
-                .productId(paymentDTO.productId())
-                .id(paymentDTO.id())
-                .chatId(paymentDTO.chatId())
-                .createAt(Calendar.getInstance())
-                .accessToken(paymentDTO.accessToken())
-                .expirateAt(expirateAt)
-                .build();
-
-        paymentModel = paymentService.generatePaymentData(paymentModel);
-        servicePaymentProducer.sendProductPaymentMessage(paymentModel);
+        paymentDTO = paymentService.generatePaymentData(paymentDTO);
+        servicePaymentProducer.sendProductPaymentMessage(paymentDTO);
     }
 
     @Bean

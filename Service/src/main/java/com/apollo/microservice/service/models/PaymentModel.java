@@ -1,18 +1,15 @@
 package com.apollo.microservice.service.models;
 
-import com.apollo.microservice.service.dtos.CouponDTO;
-import com.apollo.microservice.service.enums.PaymentIntent;
 import com.apollo.microservice.service.enums.PaymentStatus;
-import com.apollo.microservice.service.enums.ServiceType;
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
-import lombok.AllArgsConstructor;
-import lombok.Builder;
-import lombok.Data;
-import lombok.NoArgsConstructor;
+import lombok.*;
 
 import java.util.Calendar;
+import java.util.List;
 
-@Data
+@Getter
+@Setter
 @Builder
 @Entity
 @AllArgsConstructor
@@ -21,23 +18,11 @@ import java.util.Calendar;
 public class PaymentModel {
 
     @Id
-    @GeneratedValue(strategy = GenerationType.UUID)
-    private String id;
-
-    @Column
-    private ServiceType serviceType;
+    @GeneratedValue(strategy = GenerationType.SEQUENCE)
+    private Long id;
 
     @Column
     private PaymentStatus paymentStatus;
-
-    @Column
-    private PaymentIntent paymentIntent;
-
-    @Column
-    private double price;
-
-    @Column
-    private String serviceId;
 
     @Column
     private String chatId;
@@ -48,14 +33,15 @@ public class PaymentModel {
     @Column
     private String externalReference;
 
-    @Column
-    private String accessToken;
-
-    @Column
-    private Long productId;
-
     @Embedded
-    private CouponDTO coupon;
+    private AuthorizationData authorizationData;
+
+    @ManyToOne
+    private ProductModel product;
+
+    @JsonIgnore
+    @OneToMany(mappedBy = "payment", fetch = FetchType.LAZY)
+    private List<CouponModel> coupons;
 
     @Column
     private Calendar createAt;
@@ -68,4 +54,21 @@ public class PaymentModel {
 
     @Column(length = 5000)
     private String qrcodeBase64;
+
+    @Override
+    public String toString() {
+        return "PaymentModel{" +
+                "id=" + id +
+                ", paymentStatus=" + paymentStatus +
+                ", chatId='" + chatId + '\'' +
+                ", payer='" + payer + '\'' +
+                ", externalReference='" + externalReference + '\'' +
+                ", authorizationData=" + authorizationData +
+                ", product=" + product +
+                ", createAt=" + createAt +
+                ", expirateAt=" + expirateAt +
+                ", qrcode='" + qrcode + '\'' +
+                ", qrcodeBase64='" + qrcodeBase64 + '\'' +
+                '}';
+    }
 }
