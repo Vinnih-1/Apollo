@@ -1,14 +1,14 @@
 package com.apollo.microservice.service.models;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.annotation.JsonManagedReference;
 import jakarta.persistence.*;
-import lombok.AllArgsConstructor;
-import lombok.Builder;
-import lombok.Data;
-import lombok.NoArgsConstructor;
+import lombok.*;
 
 import java.util.Calendar;
 
-@Data
+@Getter
+@Setter
 @Builder
 @Entity
 @AllArgsConstructor
@@ -17,20 +17,32 @@ import java.util.Calendar;
 public class CouponModel {
 
     @Id
-    @GeneratedValue(strategy = GenerationType.AUTO)
+    @GeneratedValue(strategy = GenerationType.SEQUENCE)
     private Long id;
 
     @Column(unique = true)
     private String name;
 
-    @Column
-    private String serviceId;
+    @JsonIgnore
+    @ManyToOne
+    private PaymentModel payment;
 
     @Column
     private Integer discount;
 
+    @ManyToOne
+    @JsonManagedReference
+    @JoinColumn(name = "service_id")
+    private ServiceModel service;
+
     @Column
-    private boolean isEnabled;
+    private Integer usage;
+
+    @Column
+    private Integer maxUsage;
+
+    @Column
+    private boolean isExpired;
 
     @Temporal(TemporalType.DATE)
     private Calendar createAt;
