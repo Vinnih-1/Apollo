@@ -2,13 +2,12 @@ package com.apollo.microservice.service.controllers;
 
 import com.apollo.microservice.service.clients.UserClient;
 import com.apollo.microservice.service.dtos.Authority;
-import com.apollo.microservice.service.dtos.ProductDTO;
 import com.apollo.microservice.service.dtos.ServiceDTO;
 import com.apollo.microservice.service.enums.PaymentStatus;
-import com.apollo.microservice.service.enums.ServiceType;
 import com.apollo.microservice.service.models.PaymentModel;
 import com.apollo.microservice.service.models.ServiceModel;
 import com.apollo.microservice.service.services.PlanService;
+import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
@@ -33,33 +32,12 @@ public class ServiceController {
     private PlanService planService;
 
     @GetMapping("/")
-    public ResponseEntity<ServiceDTO> getServiceByToken(@RequestHeader("Authorization") String token) {
+    public ResponseEntity<ServiceModel> getServiceByToken(@RequestHeader("Authorization") String token) {
         var user = userClient.validateToken(token.substring(7));
         if (!user.isValid()) return ResponseEntity.badRequest().build();
         var service = planService.findByOwner(user.getEmail());
-        if (service == null) return ResponseEntity.ok(new ServiceDTO());
-        var serviceDto = new ServiceDTO(
-                service.getId(),
-                service.getServiceKey(),
-                service.getOwner(),
-                service.getDiscordId(),
-                service.getCategoryId(),
-                ServiceType.PROFESSIONAL,
-                planService.getPaymentsFromService(service.getId()).size(),
-                planService.getPaymentsFromService(service.getId()).stream()
-                        .mapToDouble(PaymentModel::getPrice)
-                        .sum(),
-                service.getProducts().stream()
-                        .map(product -> new ProductDTO(
-                                product.getId(),
-                                product.getName(),
-                                product.getDescription(),
-                                product.getPrice(),
-                                service.getId())
-                        ).toList()
-        );
-
-        return ResponseEntity.ok(serviceDto);
+        if (service == null) return ResponseEntity.ok(new ServiceModel());
+        return ResponseEntity.ok(service);
     }
 
     @GetMapping("/email/")
@@ -88,7 +66,7 @@ public class ServiceController {
     @GetMapping("/payments")
     public ResponseEntity<List<PaymentModel>> getPaymentsService(@RequestParam("status") PaymentStatus paymentStatus, @RequestHeader("Authorization") String token) {
         var user = userClient.userByToken(token);
-        return ResponseEntity.ok(planService.getPaymentsFromService(planService.findByOwner(user.getEmail()).getId(), paymentStatus));
+        return ResponseEntity.ok(planService.getPaymentsFromService(planService.findByOwner(user.getEmail()), paymentStatus));
     }
 
     @GetMapping("/{id}")
@@ -97,18 +75,7 @@ public class ServiceController {
 
         if (service == null)
             return ResponseEntity.badRequest().build();
-
-        var products = service.getProducts()
-                .stream()
-                .map(product -> new ProductDTO(
-                        product.getId(),
-                        product.getName(),
-                        product.getDescription(),
-                        product.getPrice(),
-                        service.getId())
-                ).toList();
-
-        var serviceDto = new ServiceDTO(
+        /*var serviceDto = new ServiceDTO(
                 service.getId(),
                 "",
                 service.getOwner(),
@@ -117,41 +84,20 @@ public class ServiceController {
                 null,
                 0,
                 0,
-                products
-        );
+                service.getProducts(),
+                service.getCoupons()
+        );*/
 
-        return ResponseEntity.ok(serviceDto);
+        return ResponseEntity.ok().build();
     }
 
-    @GetMapping("/discord/{id}")
-    public ResponseEntity<ServiceDTO> getServiceByDiscordId(@PathVariable(value = "id") String id) {
+    @GetMapping("/discord")
+    public ResponseEntity<ServiceDTO> getServiceByDiscordId(@RequestParam(value = "id") String id) {
         var service = planService.findByDiscordId(id);
-
-        if (service == null)
-            return ResponseEntity.badRequest().build();
-
-        var products = service.getProducts()
-                .stream()
-                .map(product -> new ProductDTO(
-                        product.getId(),
-                        product.getName(),
-                        product.getDescription(),
-                        product.getPrice(),
-                        service.getId())
-                ).toList();
-
-        var serviceDto = new ServiceDTO(
-                service.getId(),
-                "",
-                service.getOwner(),
-                service.getDiscordId(),
-                service.getCategoryId(),
-                null,
-                0,
-                0,
-                products
-        );
-
-        return ResponseEntity.ok(serviceDto);
+        if (service == null) return ResponseEntity.badRequest().build();
+        var serviceDTO = new ServiceDTO();
+        BeanUtils.copyProperties(service, serviceDTO);
+        serviceDTO.setProducts(service.getProducts());
+        return ResponseEntity.ok(serviceDTO);
     }
 }
