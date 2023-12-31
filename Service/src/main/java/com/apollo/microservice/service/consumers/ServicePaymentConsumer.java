@@ -1,8 +1,11 @@
 package com.apollo.microservice.service.consumers;
 
+import com.apollo.microservice.service.dtos.PaymentDTO;
+import com.apollo.microservice.service.models.AuthorizationData;
 import com.apollo.microservice.service.models.PaymentModel;
 import com.apollo.microservice.service.producers.ServicePaymentProducer;
-import com.apollo.microservice.service.repositories.PaymentRepository;
+import com.apollo.microservice.service.services.PaymentService;
+import com.apollo.microservice.service.services.PlanService;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.springframework.amqp.rabbit.annotation.RabbitListener;
 import org.springframework.amqp.support.converter.Jackson2JsonMessageConverter;
@@ -18,21 +21,43 @@ public class ServicePaymentConsumer {
     private ServicePaymentProducer servicePaymentProducer;
 
     @Autowired
-    private PaymentRepository paymentRepository;
+    private PaymentService paymentService;
 
-    @RabbitListener(queues = "payment.service")
-    public void listenServicePaymentQueue(@Payload PaymentModel paymentModel) {
-        if (paymentModel.getExternalReference() == null) return;
+    @Autowired
+    private PlanService planService;
 
-        paymentRepository.findByExternalReference(paymentModel.getExternalReference())
-                .ifPresentOrElse(payment -> {
-                    payment.setPaymentStatus(paymentModel.getPaymentStatus());
-                    paymentRepository.save(payment);
-                    System.out.println("Novo pagamento editado: " + payment);
-                }, () -> {
-                    paymentRepository.save(paymentModel);
-                    System.out.println("Novo pagamento criado: " + paymentModel);
-                });
+    /**
+     * Esta fila produz uma nova entidade de pagamento da estaca zero.
+     * <p>
+     * Utiliza do Service Id para pegar os dados de access token
+     * para gerar o QrCode de pagamento e salva o objeto no banco de dados.
+     * <p>
+     * Ao final de tudo, ele devolve o objeto com os dados completos
+     * para a exchange payment
+     *
+     * @param paymentDTO
+     */
+    @RabbitListener(queues = "producer.payment")
+    public void listenServicePaymentProducerQueue(@Payload PaymentDTO paymentDTO) {
+        System.out.println(paymentDTO);
+        var product = planService.findProductById(paymentDTO.getProduct().getId());
+        var service = planService.findServiceById((paymentDTO.getProduct().getServiceId()));
+        var payment = paymentService.generatePaymentData(
+                PaymentModel.builder()
+                        .payer(paymentDTO.getPayer())
+                        .paymentStatus(paymentDTO.getPaymentStatus())
+                        .chatId(paymentDTO.getChatId())
+                        .product(product)
+                        .coupons(paymentDTO.getCoupons())
+                        .authorizationData(AuthorizationData.builder()
+                                .authorizationChatId(service.getAuthorizationData().getAuthorizationChatId())
+                                .discordId(service.getAuthorizationData().getDiscordId())
+                                .categoryId(service.getAuthorizationData().getCategoryId())
+                                .build())
+                        .build(),
+                service
+        );
+        servicePaymentProducer.publishCreatePaymentMessage(payment);
     }
 
     @Bean
