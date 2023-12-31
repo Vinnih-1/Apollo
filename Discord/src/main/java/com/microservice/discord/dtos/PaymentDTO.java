@@ -1,17 +1,41 @@
 package com.microservice.discord.dtos;
 
-import com.microservice.discord.enums.PaymentIntent;
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.microservice.discord.enums.PaymentStatus;
+import lombok.AllArgsConstructor;
+import lombok.Builder;
+import lombok.Data;
+import lombok.NoArgsConstructor;
 
-public record PaymentDTO(
-        String id,
-        String payer,
-        String discordId,
-        String chatId,
-        String couponId,
-        PaymentStatus paymentStatus,
-        PaymentIntent paymentIntent,
-        double price,
-        Long productId
-) {
+import java.util.Calendar;
+import java.util.List;
+
+@Data
+@Builder
+@AllArgsConstructor
+@NoArgsConstructor
+@JsonIgnoreProperties(ignoreUnknown = true)
+public class PaymentDTO {
+
+    private Long id;
+
+    private PaymentStatus paymentStatus;
+
+    private String chatId;
+
+    private String payer;
+
+    private String externalReference;
+
+    private ProductDTO product;
+
+    private List<CouponDTO> coupons;
+
+    private Calendar createAt;
+
+    private Calendar expirateAt;
+
+    private String qrcode;
+
+    private String qrcodeBase64;
 }
