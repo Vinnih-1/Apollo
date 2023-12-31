@@ -6,7 +6,11 @@ import net.dv8tion.jda.api.events.interaction.command.SlashCommandInteractionEve
 import net.dv8tion.jda.api.interactions.components.text.TextInput;
 import net.dv8tion.jda.api.interactions.components.text.TextInputStyle;
 import net.dv8tion.jda.api.interactions.modals.Modal;
+import org.springframework.context.annotation.Scope;
+import org.springframework.stereotype.Component;
 
+@Component
+@Scope("prototype")
 public class AuthorizeSlashCommandImpl extends BaseSlashCommand {
 
     public AuthorizeSlashCommandImpl() {
@@ -18,15 +22,22 @@ public class AuthorizeSlashCommandImpl extends BaseSlashCommand {
         );
     }
 
+    /**
+     * Cria o Modal para receber o ID do serviço
+     * junto da Service Key do usuário.
+     *
+     * @param event
+     * @see com.microservice.discord.services.discord.listeners.modallisteners.impl.AuthorizeModalImpl
+     */
     @Override
-    public void execute(SlashCommandInteractionEvent event){
+    public void execute(SlashCommandInteractionEvent event) {
         var modal = Modal.create("modal.auth", "Autorização");
 
         modal.addActionRow(TextInput.create("service_id", "ID do Serviço", TextInputStyle.SHORT)
-                        .setRequired(true)
-                        .setPlaceholder("XXXXXXXX-XXXX-XXXX-XXXX-XXXXXXXXXXXX")
-                        .setMaxLength(36)
-                        .setMinLength(36)
+                .setRequired(true)
+                .setPlaceholder("XXXXXXXX-XXXX-XXXX-XXXX-XXXXXXXXXXXX")
+                .setMaxLength(36)
+                .setMinLength(36)
                 .build());
         modal.addActionRow(TextInput.create("service_key", "Chave do Serviço", TextInputStyle.SHORT)
                 .setRequired(true)
