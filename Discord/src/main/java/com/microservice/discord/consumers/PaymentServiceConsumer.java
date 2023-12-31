@@ -5,7 +5,6 @@ import com.microservice.discord.consumers.events.PaymentExpiredEvent;
 import com.microservice.discord.consumers.events.PaymentPendingEvent;
 import com.microservice.discord.consumers.events.PaymentSuccessEvent;
 import com.microservice.discord.models.PaymentModel;
-import com.microservice.discord.requests.ServiceRequest;
 import com.microservice.discord.services.discord.DiscordService;
 import org.springframework.amqp.rabbit.annotation.RabbitListener;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -27,17 +26,19 @@ public class PaymentServiceConsumer {
     @Autowired
     private DiscordService discordService;
 
+    /**
+     * Obtém a mensagem publicada pelo microsserviço Service,
+     * separa pelo status do pagamento e envia a mensagem
+     * adequada para cada tipo de status.
+     *
+     * @param paymentModel
+     */
     @RabbitListener(queues = "payment.discord")
     public void listenPaymentQueue(@Payload PaymentModel paymentModel) {
-        System.out.println(paymentModel);
-        ServiceRequest.getInstance()
-                .retrieveServiceByServiceId(paymentModel.getServiceId(), service -> {
-                    var guild = discordService.getJda().getGuildById(service.discordId());
-
-                    events.stream()
-                            .filter(event -> event.getPaymentStatus() == paymentModel.getPaymentStatus())
-                            .findFirst()
-                            .ifPresent(event -> event.execute(guild, paymentModel));
-                });
+        var guild = discordService.getJda().getGuildById(paymentModel.getAuthorizationData().getDiscordId());
+        events.stream()
+                .filter(event -> event.getPaymentStatus() == paymentModel.getPaymentStatus())
+                .findFirst()
+                .ifPresent(event -> event.execute(guild, paymentModel));
     }
 }
