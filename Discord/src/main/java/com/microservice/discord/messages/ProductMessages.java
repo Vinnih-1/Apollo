@@ -1,8 +1,8 @@
 package com.microservice.discord.messages;
 
 import com.microservice.discord.dtos.ProductDTO;
-import com.microservice.discord.dtos.ServiceDTO;
 import com.microservice.discord.models.PaymentModel;
+import com.microservice.discord.models.ServiceModel;
 import net.dv8tion.jda.api.EmbedBuilder;
 
 import java.awt.*;
@@ -13,14 +13,14 @@ public class ProductMessages {
 
     private static final String LOGO_URL = "https://cdn.discordapp.com/attachments/1148878336651698208/1152991830774906920/Apollo-512x512.png";
 
-    public static EmbedBuilder PRODUCT_MENU_EMBED(ServiceDTO serviceDTO) {
+    public static EmbedBuilder PRODUCT_MENU_EMBED(ServiceModel serviceModel) {
         var embed = getEmbedBuilder("Menu de Produtos");
 
         embed.setFooter("Produtos・Clique em um produto para adquirir",
                 LOGO_URL);
 
-        embed.addField(":dollar: **__Produtos disponíveis__**", String.valueOf(serviceDTO.products().size()), true);
-        embed.addField(":identification_card: **__Cupons ativos__**", "0", true);
+        embed.addField(":dollar: **__Produtos disponíveis__**", String.valueOf(serviceModel.getProducts().size()), true);
+        embed.addField(":identification_card: **__Cupons ativos__**", String.valueOf(serviceModel.getCoupons().size()), true);
 
         embed.setDescription(String.format("Para adquirir um produto, basta selecioná-los clicando no" +
                 " que desejar para gerar o QRCode de pagamento. Após isso, basta" +
@@ -33,7 +33,7 @@ public class ProductMessages {
     public static EmbedBuilder PRODUCT_PAYED_EMBED(PaymentModel paymentModel) {
         var embed = getEmbedBuilder("Produto Pago");
 
-        embed.addField("Referência externa", paymentModel.getId(), false);
+        embed.addField("Referência externa", paymentModel.getExternalReference(), false);
         embed.setDescription("Detectamos o seu pagamento pelo produto.");
         embed.setThumbnail(LOGO_URL);
 
@@ -50,7 +50,7 @@ public class ProductMessages {
                 paymentModel.getPayer(),
                 false);
         embed.addField(":dollar: **__Preço__**",
-                "R$ " + String.valueOf(paymentModel.getPrice()).replace(".", ","),
+                "R$ " + String.valueOf(paymentModel.getProduct().getPrice()).replace(".", ","),
                 false);
 
         embed.setDescription("Este QRCode tem validade de 30 minuto(s).");
@@ -65,10 +65,10 @@ public class ProductMessages {
                 LOGO_URL);
 
         embed.addField(":file_folder: **__Produto__**",
-                product.name(),
+                product.getName(),
                 false);
         embed.addField(":dollar: **__Preço__**",
-                "R$ " + String.valueOf(product.price()).replace(".", ","),
+                "R$ " + String.valueOf(product.getPrice()).replace(".", ","),
                 false);
 
         embed.setDescription("Estamos gerando o seu QRCode, aguarde um momento, por favor.");
