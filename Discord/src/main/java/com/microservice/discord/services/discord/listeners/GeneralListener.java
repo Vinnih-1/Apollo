@@ -19,26 +19,38 @@ import net.dv8tion.jda.api.events.interaction.component.ButtonInteractionEvent;
 import net.dv8tion.jda.api.events.interaction.component.StringSelectInteractionEvent;
 import net.dv8tion.jda.api.hooks.ListenerAdapter;
 import org.jetbrains.annotations.NotNull;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Component;
 
 import java.util.Arrays;
 import java.util.List;
 
+@Component
 public class GeneralListener extends ListenerAdapter {
 
     private final List<BaseListener<?>> baseListeners;
 
-    public GeneralListener() {
-        this.baseListeners = Arrays.asList(
-                new AuthorizeSlashCommandImpl(),
-                new ProductMenuSlashCommandImpl(),
+    @Autowired
+    public GeneralListener(
+            AuthorizeSlashCommandImpl authorizeSlashCommand,
+            ProductMenuSlashCommandImpl productMenuSlashCommand,
+            AuthorizeModalImpl authorizeModal,
+            PaymentModalImpl paymentModal,
+            SelectProductMenuImpl selectProductMenu,
+            GenerateProductPaymentImpl generateProductPayment,
+            CancelProductPaymentImpl cancelProductPayment
+    ) {
+        baseListeners = Arrays.asList(
+                authorizeSlashCommand,
+                productMenuSlashCommand,
 
-                new AuthorizeModalImpl(),
-                new PaymentModalImpl(),
+                authorizeModal,
+                paymentModal,
 
-                new SelectProductMenuImpl(),
+                selectProductMenu,
 
-                new GenerateProductPaymentImpl(),
-                new CancelProductPaymentImpl()
+                generateProductPayment,
+                cancelProductPayment
         );
     }
 
@@ -47,7 +59,7 @@ public class GeneralListener extends ListenerAdapter {
         baseListeners
                 .stream()
                 .filter(command -> command instanceof BaseSlashCommand)
-                .map(command -> (BaseSlashCommand)command)
+                .map(command -> (BaseSlashCommand) command)
                 .forEach(command -> event.getGuild().upsertCommand(command.getName(), command.getDescription()).queue());
     }
 
@@ -103,7 +115,6 @@ public class GeneralListener extends ListenerAdapter {
     @Override
     public void onSlashCommandInteraction(@NotNull SlashCommandInteractionEvent event) {
         var commandName = event.getCommandString().replace("/", "");
-
         var command = (BaseSlashCommand) baseListeners
                 .stream()
                 .filter(cmd -> cmd instanceof BaseSlashCommand)
