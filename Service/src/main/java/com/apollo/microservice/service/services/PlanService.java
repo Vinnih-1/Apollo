@@ -2,9 +2,7 @@ package com.apollo.microservice.service.services;
 
 import com.apollo.microservice.service.dtos.CouponDTO;
 import com.apollo.microservice.service.dtos.ProductDTO;
-import com.apollo.microservice.service.enums.PaymentStatus;
 import com.apollo.microservice.service.models.CouponModel;
-import com.apollo.microservice.service.models.PaymentModel;
 import com.apollo.microservice.service.models.ProductModel;
 import com.apollo.microservice.service.models.ServiceModel;
 import com.apollo.microservice.service.repositories.CouponRepository;
@@ -18,7 +16,6 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
 import java.util.Calendar;
-import java.util.List;
 
 @Service
 public class PlanService {
@@ -35,33 +32,24 @@ public class PlanService {
     @Autowired
     private CouponRepository couponRepository;
 
-    public List<PaymentModel> getPaymentsFromService(String serviceId, PaymentStatus paymentStatus) {
-        return paymentRepository.findAllFilteredByServiceId(serviceId, paymentStatus).orElse(null);
-    }
-
-    public List<PaymentModel> getPaymentsFromService(String serviceId) {
-        return paymentRepository.findAllByServiceId(serviceId).orElse(null);
-    }
-
     public Page<ServiceModel> getPageableServices(Pageable pageable) {
         return serviceRepository.findAll(pageable);
     }
 
-    public List<CouponModel> getCouponsFromService(String serviceId) {
-        return couponRepository.findCouponsByServiceId(serviceId).orElse(null);
-    }
-
-    public CouponModel createNewCoupon(CouponDTO couponDTO) {
+    public CouponModel createNewCoupon(CouponDTO couponDTO, ServiceModel serviceModel) {
         var calendar = Calendar.getInstance();
         calendar.add(Calendar.DAY_OF_MONTH, couponDTO.getExpirateDays());
         var coupon = CouponModel.builder()
                 .name(couponDTO.getName())
+                .usage(0)
                 .discount(couponDTO.getDiscount())
-                .serviceId(couponDTO.getServiceId())
-                .isEnabled(true)
                 .createAt(Calendar.getInstance())
                 .expirateAt(calendar)
+                .service(serviceModel)
+                .maxUsage(couponDTO.getMaxUsage() != null ? couponDTO.getMaxUsage() : -1)
+                .isExpired(false)
                 .build();
+
         couponRepository.saveAndFlush(coupon);
         return coupon;
     }
@@ -70,14 +58,15 @@ public class PlanService {
         return couponRepository.findById(id).orElse(null);
     }
 
-    public ProductModel createNewProduct(ProductDTO productDTO) {
+    public ProductModel createNewProduct(ProductDTO productDTO, ServiceModel serviceModel) {
         var product = ProductModel.builder()
                 .name(productDTO.getName().toUpperCase())
                 .description(productDTO.getDescription())
                 .price(productDTO.getPrice())
-                .service(findServiceById(productDTO.getServiceId()))
+                .service(serviceModel)
                 .createAt(Calendar.getInstance())
                 .build();
+
         productRepository.saveAndFlush(product);
         return product;
     }
@@ -87,14 +76,10 @@ public class PlanService {
     }
 
     public ServiceModel createNewService(String owner) {
-        var calendar = Calendar.getInstance();
-        calendar.add(Calendar.DAY_OF_MONTH, 30);
         var service = ServiceModel.builder()
                 .owner(owner)
                 .serviceKey(RandomStringUtils.randomAlphanumeric(8))
                 .createAt(Calendar.getInstance())
-                .expirateAt(calendar)
-                .isSuspended(false)
                 .build();
         serviceRepository.saveAndFlush(service);
         return service;
@@ -118,5 +103,9 @@ public class PlanService {
 
     public void deleteCouponById(long id) {
         couponRepository.deleteById(id);
+    }
+
+    public void savePlanService(ServiceModel serviceModel) {
+        serviceRepository.saveAndFlush(serviceModel);
     }
 }
