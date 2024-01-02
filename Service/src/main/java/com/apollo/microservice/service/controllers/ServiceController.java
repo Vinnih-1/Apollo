@@ -32,17 +32,21 @@ public class ServiceController {
     private PlanService planService;
 
     @GetMapping("/")
-    public ResponseEntity<ServiceModel> getServiceByToken(@RequestHeader("Authorization") String token) {
-        var user = userClient.validateToken(token.substring(7));
-        if (!user.isValid()) return ResponseEntity.badRequest().build();
+    public ResponseEntity<ServiceDTO> getServiceByToken(@RequestHeader("Authorization") String token) {
+        var user = userClient.userByToken(token);
         var service = planService.findByOwner(user.getEmail());
-        if (service == null) return ResponseEntity.ok(new ServiceModel());
-        return ResponseEntity.ok(service);
+        if (service == null) {
+            return ResponseEntity.notFound().build();
+        }
+        var serviceDTO = new ServiceDTO();
+        BeanUtils.copyProperties(service, serviceDTO);
+        serviceDTO.setProducts(service.getProducts());
+        return ResponseEntity.ok(serviceDTO);
     }
 
     @GetMapping("/email/")
     public ResponseEntity<ServiceModel> getServiceByOwner(@RequestParam("owner") String owner, @RequestHeader("Authorization") String token) {
-        var user = userClient.validateToken(token.substring(7));
+        var user = userClient.validateToken(token);
 
         if (!user.getAuthorities().contains(new Authority("ROLE_ADMIN"))) {
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
@@ -55,7 +59,7 @@ public class ServiceController {
 
     @GetMapping("/plans")
     public ResponseEntity<Page<ServiceModel>> getPageableServices(@RequestParam("page") int page, @RequestHeader("Authorization") String token) {
-        var user = userClient.validateToken(token.substring(7));
+        var user = userClient.validateToken(token);
 
         if (!user.getAuthorities().contains(new Authority("ROLE_ADMIN"))) {
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
@@ -69,32 +73,12 @@ public class ServiceController {
         return ResponseEntity.ok(planService.getPaymentsFromService(planService.findByOwner(user.getEmail()), paymentStatus));
     }
 
-    @GetMapping("/{id}")
-    public ResponseEntity<ServiceDTO> getServiceByServiceId(@PathVariable(value = "id") String id) {
-        var service = planService.findServiceById(id);
-
-        if (service == null)
-            return ResponseEntity.badRequest().build();
-        /*var serviceDto = new ServiceDTO(
-                service.getId(),
-                "",
-                service.getOwner(),
-                service.getDiscordId(),
-                service.getCategoryId(),
-                null,
-                0,
-                0,
-                service.getProducts(),
-                service.getCoupons()
-        );*/
-
-        return ResponseEntity.ok().build();
-    }
-
     @GetMapping("/discord")
     public ResponseEntity<ServiceDTO> getServiceByDiscordId(@RequestParam(value = "id") String id) {
         var service = planService.findByDiscordId(id);
-        if (service == null) return ResponseEntity.badRequest().build();
+        if (service == null) {
+            return ResponseEntity.notFound().build();
+        }
         var serviceDTO = new ServiceDTO();
         BeanUtils.copyProperties(service, serviceDTO);
         serviceDTO.setProducts(service.getProducts());

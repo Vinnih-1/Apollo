@@ -25,7 +25,11 @@ public class CouponController {
     @GetMapping("/")
     public ResponseEntity<List<CouponModel>> getCouponsFromService(@RequestHeader("Authorization") String token) {
         var user = userClient.userByToken(token);
-        return ResponseEntity.ok(planService.getCouponsFromService(planService.findByOwner(user.getEmail()).getId()));
+        var service = planService.findByOwner(user.getEmail());
+        if (service == null) {
+            return ResponseEntity.notFound().build();
+        }
+        return ResponseEntity.ok(service.getCoupons());
     }
 
     @PostMapping("/create")
@@ -33,10 +37,9 @@ public class CouponController {
         var user = userClient.userByToken(token);
         var service = planService.findByOwner(user.getEmail());
         if (service == null) {
-            return ResponseEntity.badRequest().build();
+            return ResponseEntity.notFound().build();
         }
-        couponDTO.setServiceId(service.getId());
-        return ResponseEntity.ok(planService.createNewCoupon(couponDTO));
+        return ResponseEntity.ok(planService.createNewCoupon(couponDTO, service));
     }
 
     @DeleteMapping("/delete")
@@ -45,9 +48,9 @@ public class CouponController {
         var service = planService.findByOwner(user.getEmail());
         var coupon = planService.findByCouponId(id);
         if (coupon == null) {
-            return ResponseEntity.badRequest().build();
+            return ResponseEntity.notFound().build();
         }
-        if (!coupon.getServiceId().equals(service.getId())) {
+        if (!coupon.getService().getId().equals(service.getId())) {
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
         }
         planService.deleteCouponById(id);
