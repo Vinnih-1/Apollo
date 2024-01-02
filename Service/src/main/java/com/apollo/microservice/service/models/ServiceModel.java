@@ -1,6 +1,5 @@
 package com.apollo.microservice.service.models;
 
-import com.fasterxml.jackson.annotation.JsonBackReference;
 import jakarta.persistence.*;
 import lombok.*;
 
@@ -26,11 +25,9 @@ public class ServiceModel {
     @Column
     private String serviceKey;
 
-    @JsonBackReference
     @OneToMany(mappedBy = "service", fetch = FetchType.EAGER)
     private List<ProductModel> products;
 
-    @JsonBackReference
     @OneToMany(mappedBy = "service", fetch = FetchType.EAGER)
     private List<CouponModel> coupons;
 
