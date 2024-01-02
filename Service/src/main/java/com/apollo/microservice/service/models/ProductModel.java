@@ -1,7 +1,6 @@
 package com.apollo.microservice.service.models;
 
-import com.fasterxml.jackson.annotation.JsonBackReference;
-import com.fasterxml.jackson.annotation.JsonManagedReference;
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import jakarta.persistence.*;
 import lombok.*;
 
@@ -27,12 +26,11 @@ public class ProductModel {
     @Column
     private double price;
 
-    @JsonBackReference
     @OneToMany(mappedBy = "product", fetch = FetchType.LAZY)
     private List<PaymentModel> payments;
 
     @ManyToOne
-    @JsonManagedReference
+    @JsonIgnoreProperties("products")
     @JoinColumn(name = "service_id")
     private ServiceModel service;
 
