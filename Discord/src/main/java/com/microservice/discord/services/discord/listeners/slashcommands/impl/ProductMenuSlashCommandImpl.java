@@ -35,33 +35,32 @@ public class ProductMenuSlashCommandImpl extends BaseSlashCommand {
     @Override
     public void execute(SlashCommandInteractionEvent event) {
         event.deferReply(true).closeResources().queue();
-        var service = serviceClient.findServiceByDiscordId(event.getGuild().getId(), dotEnv.get("REQUEST_BEARER_TOKEN"));
+        try {
+            var service = serviceClient.findServiceByDiscordId(event.getGuild().getId(), dotEnv.get("REQUEST_BEARER_TOKEN"));
+            var products = service.getProducts();
 
-        if (service == null) {
+            if (products.isEmpty()) {
+                event.getMessageChannel().sendMessageEmbeds(ProductMessages.EMPTY_PRODUCT_LIST().build()).queue();
+                return;
+            }
+            var menu = StringSelectMenu.create("menu.products");
+
+            // value contains the product id, service id and price of the product separated by "_"
+            // 352_3dd23186-6fe0-4b49-a558-a0adcc12b385_15.0
+            products.forEach(product -> {
+                var values = product.getId() + "_" + service.getId() + "_" + product.getPrice();
+                menu.addOption(
+                        "R$ " + String.valueOf(product.getPrice()).replace(".", ",") + " - " + product.getName(),
+                        values,
+                        product.getDescription() == null ? "Produto sem descrição" : product.getDescription(),
+                        Emoji.fromUnicode("U+1F4C1"));
+            });
+
+            event.getMessageChannel().sendMessageEmbeds(ProductMessages.PRODUCT_MENU_EMBED(service).build())
+                    .addActionRow(menu.build()).queue();
+        } catch (Exception e) {
             event.getMessageChannel().sendMessageEmbeds(AuthorizeMessages.UNAUTHORIZED().build())
                     .queue();
-            return;
         }
-        var products = service.getProducts();
-
-        if (products.isEmpty()) {
-            event.getMessageChannel().sendMessageEmbeds(ProductMessages.EMPTY_PRODUCT_LIST().build()).queue();
-            return;
-        }
-        var menu = StringSelectMenu.create("menu.products");
-
-        // value contains the product id, service id and price of the product separated by "_"
-        // 352_3dd23186-6fe0-4b49-a558-a0adcc12b385_15.0
-        products.forEach(product -> {
-            var values = product.getId() + "_" + service.getId() + "_" + product.getPrice();
-            menu.addOption(
-                    "R$ " + String.valueOf(product.getPrice()).replace(".", ",") + " - " + product.getName(),
-                    values,
-                    product.getDescription() == null ? "Produto sem descrição" : product.getDescription(),
-                    Emoji.fromUnicode("U+1F4C1"));
-        });
-
-        event.getMessageChannel().sendMessageEmbeds(ProductMessages.PRODUCT_MENU_EMBED(service).build())
-                .addActionRow(menu.build()).queue();
     }
 }
