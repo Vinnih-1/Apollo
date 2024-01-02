@@ -3,8 +3,6 @@ package com.apollo.microservice.service.controllers;
 import com.apollo.microservice.service.clients.UserClient;
 import com.apollo.microservice.service.dtos.Authority;
 import com.apollo.microservice.service.dtos.ServiceDTO;
-import com.apollo.microservice.service.enums.PaymentStatus;
-import com.apollo.microservice.service.models.PaymentModel;
 import com.apollo.microservice.service.models.ServiceModel;
 import com.apollo.microservice.service.services.PlanService;
 import org.springframework.beans.BeanUtils;
@@ -15,8 +13,6 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.client.RestTemplate;
-
-import java.util.List;
 
 @RestController
 @RequestMapping("service")
@@ -65,12 +61,6 @@ public class ServiceController {
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
         }
         return ResponseEntity.ok(planService.getPageableServices(PageRequest.of(page, 20)));
-    }
-
-    @GetMapping("/payments")
-    public ResponseEntity<List<PaymentModel>> getPaymentsService(@RequestParam("status") PaymentStatus paymentStatus, @RequestHeader("Authorization") String token) {
-        var user = userClient.userByToken(token);
-        return ResponseEntity.ok(planService.getPaymentsFromService(planService.findByOwner(user.getEmail()), paymentStatus));
     }
 
     @GetMapping("/discord")
