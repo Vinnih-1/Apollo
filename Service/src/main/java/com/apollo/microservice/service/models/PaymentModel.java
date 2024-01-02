@@ -2,6 +2,7 @@ package com.apollo.microservice.service.models;
 
 import com.apollo.microservice.service.enums.PaymentStatus;
 import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.annotation.JsonManagedReference;
 import jakarta.persistence.*;
 import lombok.*;
 
@@ -36,11 +37,12 @@ public class PaymentModel {
     @Embedded
     private AuthorizationData authorizationData;
 
+    @JsonManagedReference
     @ManyToOne
     private ProductModel product;
 
     @JsonIgnore
-    @OneToMany(mappedBy = "payment", fetch = FetchType.LAZY)
+    @OneToMany(mappedBy = "payment", fetch = FetchType.EAGER)
     private List<CouponModel> coupons;
 
     @Column
