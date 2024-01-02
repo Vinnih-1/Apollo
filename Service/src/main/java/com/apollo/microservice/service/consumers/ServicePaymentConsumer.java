@@ -39,7 +39,6 @@ public class ServicePaymentConsumer {
      */
     @RabbitListener(queues = "producer.payment")
     public void listenServicePaymentProducerQueue(@Payload PaymentDTO paymentDTO) {
-        System.out.println(paymentDTO);
         var product = planService.findProductById(paymentDTO.getProduct().getId());
         var service = planService.findServiceById((paymentDTO.getProduct().getServiceId()));
         var payment = paymentService.generatePaymentData(
