@@ -35,7 +35,7 @@ public class CouponModel {
     @JoinColumn(name = "service_id")
     private ServiceModel service;
 
-    @Column
+    @Column(name = "coupon_usage")
     private Integer usage;
 
     @Column
@@ -49,4 +49,19 @@ public class CouponModel {
 
     @Temporal(TemporalType.DATE)
     private Calendar expirateAt;
+
+    @Override
+    public String toString() {
+        return "CouponModel{" +
+                "id=" + id +
+                ", name='" + name + '\'' +
+                ", payment=" + payment +
+                ", discount=" + discount +
+                ", usage=" + usage +
+                ", maxUsage=" + maxUsage +
+                ", isExpired=" + isExpired +
+                ", createAt=" + createAt +
+                ", expirateAt=" + expirateAt +
+                '}';
+    }
 }
