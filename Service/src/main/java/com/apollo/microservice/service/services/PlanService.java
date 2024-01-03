@@ -3,6 +3,7 @@ package com.apollo.microservice.service.services;
 import com.apollo.microservice.service.dtos.CouponDTO;
 import com.apollo.microservice.service.dtos.ProductDTO;
 import com.apollo.microservice.service.models.CouponModel;
+import com.apollo.microservice.service.models.PaymentModel;
 import com.apollo.microservice.service.models.ProductModel;
 import com.apollo.microservice.service.models.ServiceModel;
 import com.apollo.microservice.service.repositories.CouponRepository;
@@ -34,6 +35,10 @@ public class PlanService {
 
     public Page<ServiceModel> getPageableServices(Pageable pageable) {
         return serviceRepository.findAll(pageable);
+    }
+
+    public Page<PaymentModel> getPageablePaymentsByServiceId(Pageable pageable, String serviceId) {
+        return paymentRepository.findAllByServiceId(pageable, serviceId);
     }
 
     public CouponModel createNewCoupon(CouponDTO couponDTO, ServiceModel serviceModel) {
