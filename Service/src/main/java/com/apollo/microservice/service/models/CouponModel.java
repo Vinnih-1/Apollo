@@ -1,6 +1,5 @@
 package com.apollo.microservice.service.models;
 
-import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import jakarta.persistence.*;
 import lombok.*;
 
@@ -26,7 +25,6 @@ public class CouponModel {
     private Integer discount;
 
     @ManyToOne
-    @JsonIgnoreProperties("coupons")
     @JoinColumn(name = "service_id")
     private ServiceModel service;
 
