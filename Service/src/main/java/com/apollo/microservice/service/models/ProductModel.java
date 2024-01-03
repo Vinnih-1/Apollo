@@ -1,6 +1,5 @@
 package com.apollo.microservice.service.models;
 
-import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import jakarta.persistence.*;
 import lombok.*;
 
@@ -30,7 +29,6 @@ public class ProductModel {
     private List<PaymentModel> payments;
 
     @ManyToOne
-    @JsonIgnoreProperties("products")
     @JoinColumn(name = "service_id")
     private ServiceModel service;
 
