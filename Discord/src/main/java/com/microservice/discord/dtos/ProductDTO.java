@@ -30,5 +30,6 @@ public class ProductDTO {
 
     private String serviceId;
 
+    @JsonIgnoreProperties({"product", "qrcodeBase64", "qrcode"})
     private List<PaymentDTO> payments;
 }
