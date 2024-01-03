@@ -15,5 +15,8 @@ public interface PaymentRepository extends JpaRepository<PaymentModel, String> {
     @Query("SELECT p FROM PaymentModel p WHERE p.product.service.id = :serviceId")
     Page<PaymentModel> findAllByServiceId(Pageable pageable, String serviceId);
 
+    @Query("SELECT p FROM PaymentModel p WHERE p.expirateAt > CURRENT_TIMESTAMP")
+    Page<PaymentModel> findAllNonExpired(Pageable pageable);
+
     void deleteByExternalReference(String externalReference);
 }

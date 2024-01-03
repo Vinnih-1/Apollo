@@ -37,6 +37,10 @@ public class PlanService {
         return serviceRepository.findAll(pageable);
     }
 
+    public Page<PaymentModel> getPageablePayments(Pageable pageable) {
+        return paymentRepository.findAllNonExpired(pageable);
+    }
+
     public Page<PaymentModel> getPageablePaymentsByServiceId(Pageable pageable, String serviceId) {
         return paymentRepository.findAllByServiceId(pageable, serviceId);
     }

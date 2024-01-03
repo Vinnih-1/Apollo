@@ -3,6 +3,7 @@ package com.apollo.microservice.service.controllers;
 import com.apollo.microservice.service.clients.UserClient;
 import com.apollo.microservice.service.dtos.Authority;
 import com.apollo.microservice.service.dtos.ServiceDTO;
+import com.apollo.microservice.service.models.PaymentModel;
 import com.apollo.microservice.service.models.ServiceModel;
 import com.apollo.microservice.service.services.PlanService;
 import org.springframework.beans.BeanUtils;
@@ -42,7 +43,6 @@ public class ServiceController {
 
     @GetMapping("/email/")
     public ResponseEntity<ServiceModel> getServiceByOwner(@RequestParam("owner") String owner, @RequestHeader("Authorization") String token) {
-        System.out.println(token);
         var user = userClient.validateToken(token);
 
         if (!user.getAuthorities().contains(new Authority("ROLE_ADMIN"))) {
@@ -52,6 +52,16 @@ public class ServiceController {
         if (service == null) return ResponseEntity.ok(new ServiceModel());
 
         return ResponseEntity.ok(service);
+    }
+
+    @GetMapping("payments")
+    public ResponseEntity<Page<PaymentModel>> getPageablePayments(@RequestParam("page") int page, @RequestHeader("Authorization") String token) {
+        var user = userClient.userByToken(token);
+
+        if (!user.getAuthorities().contains(new Authority("ROLE_ADMIN"))) {
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
+        }
+        return ResponseEntity.ok(planService.getPageablePayments(PageRequest.of(page, 20)));
     }
 
     @GetMapping("/plans")
