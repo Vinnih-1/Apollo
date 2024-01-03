@@ -1,5 +1,6 @@
 package com.apollo.microservice.service.models;
 
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import jakarta.persistence.*;
 import lombok.*;
 
@@ -25,9 +26,11 @@ public class ServiceModel {
     @Column
     private String serviceKey;
 
+    @JsonIgnoreProperties("service")
     @OneToMany(mappedBy = "service", fetch = FetchType.EAGER)
     private List<ProductModel> products;
 
+    @JsonIgnoreProperties("service")
     @OneToMany(mappedBy = "service", fetch = FetchType.EAGER)
     private List<CouponModel> coupons;
 
