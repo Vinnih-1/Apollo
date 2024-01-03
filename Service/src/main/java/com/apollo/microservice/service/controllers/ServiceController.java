@@ -10,6 +10,7 @@ import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Sort;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -37,7 +38,10 @@ public class ServiceController {
         }
         var serviceDTO = new ServiceDTO();
         BeanUtils.copyProperties(service, serviceDTO);
-        serviceDTO.setPayments(planService.getPageablePaymentsByServiceId(PageRequest.of(page, 10), service.getId()).stream().toList());
+        serviceDTO.setPayments(planService
+                .getPageablePaymentsByServiceId(PageRequest.of(page, 10)
+                        .withSort(Sort.Direction.DESC, "expirateAt"), service.getId()).stream().toList());
+
         return ResponseEntity.ok(serviceDTO);
     }
 
