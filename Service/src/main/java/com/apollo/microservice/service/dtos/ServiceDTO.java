@@ -2,6 +2,7 @@ package com.apollo.microservice.service.dtos;
 
 import com.apollo.microservice.service.models.AuthorizationData;
 import com.apollo.microservice.service.models.CouponModel;
+import com.apollo.microservice.service.models.PaymentModel;
 import com.apollo.microservice.service.models.ProductModel;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import jakarta.validation.constraints.NotBlank;
@@ -30,9 +31,14 @@ public class ServiceDTO {
 
     private double moneyMoved;
 
+    @JsonIgnoreProperties({"payments", "service"})
     private List<ProductModel> products;
 
+    @JsonIgnoreProperties({"service"})
     private List<CouponModel> coupons;
+
+    @JsonIgnoreProperties({"qrcode", "qrcodeBase64"})
+    private List<PaymentModel> payments;
 
     private AuthorizationData authorizationData;
 }

@@ -28,7 +28,7 @@ public class ServiceController {
     private PlanService planService;
 
     @GetMapping("/")
-    public ResponseEntity<ServiceDTO> getServiceByToken(@RequestHeader("Authorization") String token) {
+    public ResponseEntity<ServiceDTO> getServiceByToken(@RequestParam("page") int page, @RequestHeader("Authorization") String token) {
         var user = userClient.userByToken(token);
         var service = planService.findByOwner(user.getEmail());
         if (service == null) {
@@ -36,12 +36,13 @@ public class ServiceController {
         }
         var serviceDTO = new ServiceDTO();
         BeanUtils.copyProperties(service, serviceDTO);
-        serviceDTO.setProducts(service.getProducts());
+        serviceDTO.setPayments(planService.getPageablePaymentsByServiceId(PageRequest.of(page, 10), service.getId()).stream().toList());
         return ResponseEntity.ok(serviceDTO);
     }
 
     @GetMapping("/email/")
     public ResponseEntity<ServiceModel> getServiceByOwner(@RequestParam("owner") String owner, @RequestHeader("Authorization") String token) {
+        System.out.println(token);
         var user = userClient.validateToken(token);
 
         if (!user.getAuthorities().contains(new Authority("ROLE_ADMIN"))) {
@@ -71,7 +72,6 @@ public class ServiceController {
         }
         var serviceDTO = new ServiceDTO();
         BeanUtils.copyProperties(service, serviceDTO);
-        serviceDTO.setProducts(service.getProducts());
         return ResponseEntity.ok(serviceDTO);
     }
 }
