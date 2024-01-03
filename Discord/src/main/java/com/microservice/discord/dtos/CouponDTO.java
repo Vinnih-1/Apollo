@@ -5,6 +5,8 @@ import jakarta.persistence.Column;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 
+import java.util.Calendar;
+
 @JsonIgnoreProperties(ignoreUnknown = true)
 public class CouponDTO {
 
@@ -22,10 +24,15 @@ public class CouponDTO {
 
     private Integer maxUsage;
 
+    private boolean isExpired;
+
     @NotNull
     private Integer expirateDays;
 
     @Column(insertable = false, updatable = false)
     private String serviceId;
 
+    private Calendar createAt;
+
+    private Calendar expirateAt;
 }
