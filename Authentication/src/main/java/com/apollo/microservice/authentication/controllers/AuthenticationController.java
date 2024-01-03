@@ -32,7 +32,7 @@ public class AuthenticationController {
 
     @GetMapping("/validate")
     public ResponseEntity<GatewayAuthenticationDTO> testToken(@RequestParam("token") String token) {
-        var gatewayAuthenticationDTO = authenticationService.isValidToken(token);
+        var gatewayAuthenticationDTO = authenticationService.isValidToken(token.startsWith("Bearer ") ? token.substring(7) : token);
         return ResponseEntity.ok(gatewayAuthenticationDTO);
     }
 
