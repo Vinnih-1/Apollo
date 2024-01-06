@@ -5,6 +5,7 @@ import com.apollo.microservice.service.dtos.Authority;
 import com.apollo.microservice.service.dtos.ServiceDTO;
 import com.apollo.microservice.service.models.PaymentModel;
 import com.apollo.microservice.service.models.ServiceModel;
+import com.apollo.microservice.service.services.PaymentService;
 import com.apollo.microservice.service.services.PlanService;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -29,6 +30,9 @@ public class ServiceController {
     @Autowired
     private PlanService planService;
 
+    @Autowired
+    private PaymentService paymentService;
+
     @GetMapping("/")
     public ResponseEntity<ServiceDTO> getServiceByToken(@RequestParam("page") int page, @RequestHeader("Authorization") String token) {
         var user = userClient.userByToken(token);
@@ -38,7 +42,7 @@ public class ServiceController {
         }
         var serviceDTO = new ServiceDTO();
         BeanUtils.copyProperties(service, serviceDTO);
-        serviceDTO.setPayments(planService
+        serviceDTO.setPayments(paymentService
                 .getPageablePaymentsByServiceId(PageRequest.of(page, 10)
                         .withSort(Sort.Direction.DESC, "expirateAt"), service.getId()).stream().toList());
 
@@ -65,7 +69,7 @@ public class ServiceController {
         if (!user.getAuthorities().contains(new Authority("ROLE_ADMIN"))) {
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
         }
-        return ResponseEntity.ok(planService.getPageablePayments(PageRequest.of(page, 20)));
+        return ResponseEntity.ok(paymentService.getPageablePayments(PageRequest.of(page, 20)));
     }
 
     @GetMapping("/plans")
