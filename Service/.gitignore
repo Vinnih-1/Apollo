@@ -9,9 +9,6 @@ build/
 
 src/test/*
 
-MercadoPagoService.java
-CreatePaymentMessageTests.java
-
 ### STS ###
 .apt_generated
 .classpath
