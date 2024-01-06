@@ -6,6 +6,7 @@ import com.apollo.microservice.service.models.PaymentModel;
 import com.apollo.microservice.service.producers.ServicePaymentProducer;
 import com.apollo.microservice.service.services.PaymentService;
 import com.apollo.microservice.service.services.PlanService;
+import com.apollo.microservice.service.services.ProductService;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.springframework.amqp.rabbit.annotation.RabbitListener;
 import org.springframework.amqp.support.converter.Jackson2JsonMessageConverter;
@@ -26,6 +27,9 @@ public class ServicePaymentConsumer {
     @Autowired
     private PlanService planService;
 
+    @Autowired
+    private ProductService productService;
+
     /**
      * Esta fila produz uma nova entidade de pagamento da estaca zero.
      * <p>
@@ -39,7 +43,7 @@ public class ServicePaymentConsumer {
      */
     @RabbitListener(queues = "producer.payment")
     public void listenServicePaymentProducerQueue(@Payload PaymentDTO paymentDTO) {
-        var product = planService.findProductById(paymentDTO.getProduct().getId());
+        var product = productService.findProductById(paymentDTO.getProduct().getId());
         var service = planService.findServiceById((paymentDTO.getProduct().getServiceId()));
         var payment = paymentService.generatePaymentData(
                 PaymentModel.builder()
