@@ -10,7 +10,7 @@ public class DotEnv {
 
     public DotEnv() {
         this.dotenv = Dotenv.configure()
-                .directory("../Discord/.env")
+                .directory("../Service/.env")
                 .load();
     }
 
