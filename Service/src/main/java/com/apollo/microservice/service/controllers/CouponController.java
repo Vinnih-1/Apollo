@@ -43,6 +43,9 @@ public class CouponController {
         if (service == null) {
             return ResponseEntity.notFound().build();
         }
+        if (service.getCoupons().stream().anyMatch(coupon -> coupon.getName().equals(couponDTO.getName()))) {
+            return ResponseEntity.badRequest().build();
+        }
         return ResponseEntity.ok(couponService.createNewCoupon(couponDTO, service));
     }
 
