@@ -43,40 +43,41 @@ public class SelectProductMenuImpl extends BaseMenuListener {
 
         var values = event.getInteraction().getSelectedOptions().get(0).getValue();
         var productId = values.split("_")[0];
-        var service = serviceClient.findServiceByDiscordId(event.getGuild().getId(), dotEnv.get("REQUEST_BEARER_TOKEN"));
 
-        if (service == null) {
+        try {
+            var service = serviceClient.findServiceByDiscordId(event.getGuild().getId(), dotEnv.get("REQUEST_BEARER_TOKEN"));
+            var category = service.getAuthorizationData().getCategoryId();
+
+            if (event.getGuild().getCategoryById(category) == null) {
+                event.getChannel().asTextChannel().sendMessageEmbeds(ProductMessages.CATEGORY_NOT_FOUND().build()).queue();
+                return;
+            }
+            event.getGuild().getCategoryById(category)
+                    .createTextChannel(event.getUser().getEffectiveName())
+                    .addPermissionOverride(event.getMember(),
+                            Arrays.asList(Permission.VIEW_CHANNEL, Permission.MESSAGE_SEND, Permission.MESSAGE_ATTACH_FILES),
+                            null)
+                    .queue(channel -> {
+                        var product = service.getProducts().stream()
+                                .filter(selected -> Long.parseLong(productId) == selected.getId())
+                                .findFirst().orElse(null);
+
+                        if (product == null) {
+                            channel.sendMessageEmbeds(ProductMessages.PRODUCT_NOT_FOUND().build()).queue();
+                            return;
+                        }
+
+                        channel.sendMessageEmbeds(ProductMessages.CREATING_PRODUCT_PAYMENT(product).build())
+                                .addActionRow(Button.success("generate_" + values, "Pagar").withEmoji(Emoji.fromUnicode("U+1F4B3")),
+                                        Button.danger("cancel_" + values, "Cancelar").withEmoji(Emoji.fromUnicode("U+1F4EC")))
+                                .queue();
+                    });
+        } catch (Exception e) {
             event.getChannel().sendMessageEmbeds(new EmbedBuilder()
                             .setColor(Color.RED)
                             .setDescription("Este discord não está vinculado a nenhum serviço!")
                             .build())
                     .queue();
-            return;
         }
-        var category = service.getAuthorizationData().getCategoryId();
-        if (event.getGuild().getCategoryById(category) == null) {
-            event.getChannel().asTextChannel().sendMessageEmbeds(ProductMessages.CATEGORY_NOT_FOUND().build()).queue();
-            return;
-        }
-        event.getGuild().getCategoryById(category)
-                .createTextChannel(event.getUser().getEffectiveName())
-                .addPermissionOverride(event.getMember(),
-                        Arrays.asList(Permission.VIEW_CHANNEL, Permission.MESSAGE_SEND, Permission.MESSAGE_ATTACH_FILES),
-                        null)
-                .queue(channel -> {
-                    var product = service.getProducts().stream()
-                            .filter(selected -> Long.parseLong(productId) == selected.getId())
-                            .findFirst().orElse(null);
-
-                    if (product == null) {
-                        channel.sendMessageEmbeds(ProductMessages.PRODUCT_NOT_FOUND().build()).queue();
-                        return;
-                    }
-
-                    channel.sendMessageEmbeds(ProductMessages.CREATING_PRODUCT_PAYMENT(product).build())
-                            .addActionRow(Button.success("generate_" + values, "Pagar").withEmoji(Emoji.fromUnicode("U+1F4B3")),
-                                    Button.danger("cancel_" + values, "Cancelar").withEmoji(Emoji.fromUnicode("U+1F4EC")))
-                            .queue();
-                });
     }
 }
