@@ -3,6 +3,7 @@ package com.apollo.microservice.authentication.controllers;
 import com.apollo.microservice.authentication.dtos.AuthenticationDTO;
 import com.apollo.microservice.authentication.dtos.GatewayAuthenticationDTO;
 import com.apollo.microservice.authentication.dtos.UserDTO;
+import com.apollo.microservice.authentication.producers.AuthenticationProducer;
 import com.apollo.microservice.authentication.services.AuthenticationService;
 import com.apollo.microservice.authentication.services.UserService;
 import jakarta.validation.Valid;
@@ -20,6 +21,9 @@ public class AuthenticationController {
 
     @Autowired
     private AuthenticationService authenticationService;
+
+    @Autowired
+    private AuthenticationProducer authenticationProducer;
 
     @Autowired
     private UserService userService;
@@ -55,6 +59,7 @@ public class AuthenticationController {
     public ResponseEntity<AuthenticationDTO> registerAccount(@RequestBody @Valid AuthenticationDTO authenticationDTO) {
         var userCredentials = authenticationService.registerUserCredentials(authenticationDTO);
         if (userCredentials == null) return ResponseEntity.status(HttpStatus.BAD_REQUEST).build();
+        authenticationProducer.publishAuthenticationMessage(new UserDTO(userCredentials.getEmail(), null));
         return ResponseEntity.ok(authenticationDTO);
     }
 }
