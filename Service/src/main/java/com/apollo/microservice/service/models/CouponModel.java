@@ -4,6 +4,7 @@ import jakarta.persistence.*;
 import lombok.*;
 
 import java.util.Calendar;
+import java.util.List;
 
 @Getter
 @Setter
@@ -27,6 +28,9 @@ public class CouponModel {
     @ManyToOne
     @JoinColumn(name = "service_id")
     private ServiceModel service;
+
+    @OneToMany(mappedBy = "coupon", fetch = FetchType.LAZY)
+    private List<PaymentModel> payments;
 
     @Column(name = "coupon_usage")
     private Integer usage;
