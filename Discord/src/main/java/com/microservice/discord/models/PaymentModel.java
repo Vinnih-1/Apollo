@@ -9,7 +9,6 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 
 import java.util.Calendar;
-import java.util.List;
 
 @Data
 @Builder
@@ -29,7 +28,7 @@ public class PaymentModel {
 
     private ProductDTO product;
 
-    private List<CouponDTO> coupons;
+    private CouponDTO coupon;
 
     private AuthorizationData authorizationData;
 

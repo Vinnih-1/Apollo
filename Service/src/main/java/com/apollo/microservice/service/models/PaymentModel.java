@@ -6,7 +6,6 @@ import jakarta.persistence.*;
 import lombok.*;
 
 import java.util.Calendar;
-import java.util.List;
 
 @Getter
 @Setter
@@ -40,8 +39,9 @@ public class PaymentModel {
     @JsonIgnoreProperties({"payments", "service"})
     private ProductModel product;
 
-    @OneToMany(fetch = FetchType.EAGER)
-    private List<CouponModel> coupons;
+    @ManyToOne
+    @JsonIgnoreProperties({"payments", "service"})
+    private CouponModel coupon;
 
     @Column
     private Calendar createAt;
