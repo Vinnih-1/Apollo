@@ -1,5 +1,6 @@
 package com.microservice.discord.services.discord.listeners.modallisteners.impl;
 
+import com.microservice.discord.dtos.CouponDTO;
 import com.microservice.discord.dtos.PaymentDTO;
 import com.microservice.discord.dtos.ProductDTO;
 import com.microservice.discord.enums.PaymentStatus;
@@ -35,6 +36,7 @@ public class PaymentModalImpl extends BaseModalListener {
         var values = event.getModalId().replace("paymentmodal_", "");
         var pattern = Pattern.compile("^[A-Za-z0-9+_.-]+@(.+)$");
         var email = event.getValue("email").getAsString();
+        var coupon = event.getValue("coupon").getAsString();
         if (!pattern.matcher(email).matches()) {
             event.deferReply(true).addEmbeds(new EmbedBuilder()
                     .setColor(Color.RED)
@@ -49,6 +51,9 @@ public class PaymentModalImpl extends BaseModalListener {
                 .product(ProductDTO.builder()
                         .id(Long.parseLong(values.split("_")[0]))
                         .serviceId(values.split("_")[1])
+                        .build())
+                .coupon(CouponDTO.builder()
+                        .name(coupon.toUpperCase())
                         .build())
                 .build();
         servicePaymentProducer.publishCreatePaymentMessage(paymentDTO);
