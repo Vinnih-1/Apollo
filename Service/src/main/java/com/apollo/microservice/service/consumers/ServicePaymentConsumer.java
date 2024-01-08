@@ -6,7 +6,6 @@ import com.apollo.microservice.service.models.PaymentModel;
 import com.apollo.microservice.service.producers.ServicePaymentProducer;
 import com.apollo.microservice.service.services.PaymentService;
 import com.apollo.microservice.service.services.PlanService;
-import com.apollo.microservice.service.services.ProductService;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.springframework.amqp.rabbit.annotation.RabbitListener;
 import org.springframework.amqp.support.converter.Jackson2JsonMessageConverter;
@@ -14,6 +13,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.messaging.handler.annotation.Payload;
 import org.springframework.stereotype.Component;
+
+import java.util.Objects;
 
 @Component
 public class ServicePaymentConsumer {
@@ -26,9 +27,6 @@ public class ServicePaymentConsumer {
 
     @Autowired
     private PlanService planService;
-
-    @Autowired
-    private ProductService productService;
 
     /**
      * Esta fila produz uma nova entidade de pagamento da estaca zero.
@@ -43,24 +41,36 @@ public class ServicePaymentConsumer {
      */
     @RabbitListener(queues = "producer.payment")
     public void listenServicePaymentProducerQueue(@Payload PaymentDTO paymentDTO) {
-        var product = productService.findProductById(paymentDTO.getProduct().getId());
         var service = planService.findServiceById((paymentDTO.getProduct().getServiceId()));
-        var payment = paymentService.generatePaymentData(
-                PaymentModel.builder()
-                        .payer(paymentDTO.getPayer())
-                        .paymentStatus(paymentDTO.getPaymentStatus())
-                        .chatId(paymentDTO.getChatId())
-                        .product(product)
-                        .coupons(paymentDTO.getCoupons())
-                        .authorizationData(AuthorizationData.builder()
-                                .authorizationChatId(service.getAuthorizationData().getAuthorizationChatId())
-                                .discordId(service.getAuthorizationData().getDiscordId())
-                                .categoryId(service.getAuthorizationData().getCategoryId())
-                                .build())
-                        .build(),
-                service
-        );
-        servicePaymentProducer.publishCreatePaymentMessage(payment);
+        if (service == null) return;
+
+        service.getProducts()
+                .stream()
+                .filter(product -> Objects.equals(product.getId(), paymentDTO.getProduct().getId()))
+                .findFirst()
+                .ifPresent(product -> {
+                    var coupon = service.getCoupons()
+                            .stream()
+                            .filter(c -> c.getName().equals(paymentDTO.getCoupon().getName()))
+                            .findFirst().orElse(null);
+
+                    var payment = paymentService.generatePaymentData(
+                            PaymentModel.builder()
+                                    .payer(paymentDTO.getPayer())
+                                    .paymentStatus(paymentDTO.getPaymentStatus())
+                                    .chatId(paymentDTO.getChatId())
+                                    .product(product)
+                                    .coupon(coupon)
+                                    .authorizationData(AuthorizationData.builder()
+                                            .authorizationChatId(service.getAuthorizationData().getAuthorizationChatId())
+                                            .discordId(service.getAuthorizationData().getDiscordId())
+                                            .categoryId(service.getAuthorizationData().getCategoryId())
+                                            .build())
+                                    .build(),
+                            service
+                    );
+                    servicePaymentProducer.publishCreatePaymentMessage(payment);
+                });
     }
 
     @Bean
