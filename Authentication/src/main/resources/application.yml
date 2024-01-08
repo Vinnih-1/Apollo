@@ -1,0 +1,29 @@
+server:
+  port: 8085
+
+spring:
+  application:
+    name: authentication
+  jpa:
+    show-sql: true
+    hibernate:
+      ddl-auto: update
+  datasource:
+    url: jdbc:mysql://localhost:3306/users
+    username: users
+    password: 30122003
+  rabbitmq:
+    addresses: amqps://ekwvjomf:s-sKR3MLT-nO2IoiGseI50e6jCkdvDKJ@jackal.rmq.cloudamqp.com/ekwvjomf
+  main:
+    allow-circular-references: true
+
+eureka:
+  instance:
+    appname: authentication
+  client:
+    registry-with-eureka: true
+    fetch-registry: true
+    service-url:
+      defaultZone: http://localhost:8084/eureka
+
+secret-key: SECRET
