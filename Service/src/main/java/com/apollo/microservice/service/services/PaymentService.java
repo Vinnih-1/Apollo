@@ -1,7 +1,9 @@
 package com.apollo.microservice.service.services;
 
 import com.apollo.microservice.service.configs.DotEnv;
+import com.apollo.microservice.service.models.CouponModel;
 import com.apollo.microservice.service.models.PaymentModel;
+import com.apollo.microservice.service.models.ProductModel;
 import com.apollo.microservice.service.models.ServiceModel;
 import com.apollo.microservice.service.repositories.PaymentRepository;
 import com.mercadopago.MercadoPagoConfig;
@@ -18,6 +20,7 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
 import java.math.BigDecimal;
+import java.math.RoundingMode;
 import java.util.Calendar;
 import java.util.UUID;
 
@@ -75,19 +78,29 @@ public class PaymentService {
         }
     }
 
+    public BigDecimal calculateCouponDiscount(CouponModel couponModel, ProductModel productModel) {
+        if (couponModel == null) return BigDecimal.valueOf(productModel.getPrice());
+        var discount = (double) couponModel.getDiscount() / 100;
+        var discountValue = productModel.getPrice() - (productModel.getPrice() * discount);
+        return new BigDecimal(discountValue).setScale(2, RoundingMode.HALF_UP);
+    }
+
     public PaymentCreateRequest generatePaymentRequest(PaymentModel paymentModel) {
         var uuid = UUID.randomUUID();
-        return PaymentCreateRequest.builder()
+        var discount = calculateCouponDiscount(paymentModel.getCoupon(), paymentModel.getProduct());
+        paymentModel.getProduct().setPrice(discount.doubleValue());
+        var request = PaymentCreateRequest.builder()
                 .installments(1)
                 .notificationUrl("https://payments.apollodiscord.com/notification?cliente=" + paymentModel.getId())
                 .paymentMethodId("pix")
                 .description("Serviços da Apollo")
-                .transactionAmount(BigDecimal.valueOf(paymentModel.getProduct().getPrice()))
+                .transactionAmount(discount)
                 .externalReference(uuid.toString())
                 .payer(PaymentPayerRequest.builder()
                         .email(paymentModel.getPayer())
-                        .build())
-                .build();
+                        .build());
+
+        return request.build();
     }
 
     public PaymentModel generatePaymentData(PaymentModel paymentModel, ServiceModel serviceModel) {
