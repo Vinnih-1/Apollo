@@ -40,6 +40,19 @@ Rotas do Service:
 | /service/authorize      | GET          | NÃO           |
 | /service/validate       | GET          | NÃO           |
 
+Cada usuário poderá ter um plano (também chamado de Serviço), que é criado ao usuário registrar sua conta no [site](https://github.com/Vinnih-1/Apollo-Website). Lá ele terá acesso ao dashboard onde poderá cria criar ou excluir produtos ou cupons de desconto. Tabmém poderá observar pagamentos criados e finalizados em seu plano.
+
+Após o usuário se cadastrar e entrar na dashboard, ele deverá entrar na seção de Segurança para poder convidar o bot do [Discord](https://github.com/Vinnih-1/Apollo/tree/develop/Discord) para o discord onde irá realizar as vendas de seus produtos. Logo em seguida, precisará autorizar a aplicação do projeto para poder criar e observar pagamentos na API do Mercado Pago.
+
+Comandos do Discord:
+
+| Comando      | Permissão    |
+|--------------|--------------|
+| /autorizar   | ADMIN        |
+| /menu        | ADMIN        |
+
+Depois da autorização, a categoria de vendas é criada e o usuário está apto para usar o comando /menu e vender seus produtos.
+
 O projeto tem o domínio registrado apollodiscord.com, porém não há recursos para mantê-lo de pé. Então decidi continuar o desenvolvimento apenas para aprendizado.
 Ainda em fase de desenvolvimento, qualquer pull request será bem-vindo.
 
