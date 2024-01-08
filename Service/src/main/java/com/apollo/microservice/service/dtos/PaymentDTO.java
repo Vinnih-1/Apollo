@@ -1,7 +1,6 @@
 package com.apollo.microservice.service.dtos;
 
 import com.apollo.microservice.service.enums.PaymentStatus;
-import com.apollo.microservice.service.models.CouponModel;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import jakarta.validation.constraints.NotBlank;
@@ -12,7 +11,6 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 
 import java.util.Calendar;
-import java.util.List;
 
 @Data
 @Builder
@@ -41,7 +39,7 @@ public class PaymentDTO {
     @JsonIgnore
     private ServiceDTO service;
 
-    private List<CouponModel> coupons;
+    private CouponDTO coupon;
 
     private Calendar createAt;
 
