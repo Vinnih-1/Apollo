@@ -1,6 +1,7 @@
 package com.apollo.microservice.service.services;
 
 import com.apollo.microservice.service.configs.DotEnv;
+import com.apollo.microservice.service.enums.PaymentStatus;
 import com.apollo.microservice.service.models.CouponModel;
 import com.apollo.microservice.service.models.PaymentModel;
 import com.apollo.microservice.service.models.ProductModel;
@@ -43,6 +44,10 @@ public class PaymentService {
 
     public Page<PaymentModel> getPageablePaymentsByServiceId(Pageable pageable, String serviceId) {
         return paymentRepository.findAllByServiceId(pageable, serviceId);
+    }
+
+    public Page<PaymentModel> getPageableFilteredPaymentsByServiceId(Pageable pageable, String serviceId, PaymentStatus paymentStatus) {
+        return paymentRepository.findAllFilteredByServiceId(pageable, serviceId, paymentStatus);
     }
 
     public String generateAuthorizationUrl(ServiceModel serviceModel) {
