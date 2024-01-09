@@ -1,5 +1,6 @@
 package com.apollo.microservice.service.models;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
 import lombok.*;
 
@@ -29,6 +30,7 @@ public class CouponModel {
     @JoinColumn(name = "service_id")
     private ServiceModel service;
 
+    @JsonIgnore
     @OneToMany(mappedBy = "coupon", fetch = FetchType.LAZY)
     private List<PaymentModel> payments;
 
