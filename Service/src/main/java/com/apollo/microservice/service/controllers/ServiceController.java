@@ -3,6 +3,7 @@ package com.apollo.microservice.service.controllers;
 import com.apollo.microservice.service.clients.UserClient;
 import com.apollo.microservice.service.dtos.Authority;
 import com.apollo.microservice.service.dtos.ServiceDTO;
+import com.apollo.microservice.service.enums.PaymentStatus;
 import com.apollo.microservice.service.models.PaymentModel;
 import com.apollo.microservice.service.models.ServiceModel;
 import com.apollo.microservice.service.services.PaymentService;
@@ -16,6 +17,8 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.client.RestTemplate;
+
+import java.util.Optional;
 
 @RestController
 @RequestMapping("service")
@@ -34,17 +37,29 @@ public class ServiceController {
     private PaymentService paymentService;
 
     @GetMapping("/")
-    public ResponseEntity<ServiceDTO> getServiceByToken(@RequestParam("page") int page, @RequestHeader("Authorization") String token) {
+    public ResponseEntity<ServiceDTO> getServiceByToken(
+            @RequestParam(value = "page", required = false) Optional<Integer> page,
+            @RequestParam(value = "status", required = false) Optional<String> status,
+            @RequestHeader("Authorization") String token) {
         var user = userClient.userByToken(token);
         var service = planService.findByOwner(user.getEmail());
         if (service == null) {
             return ResponseEntity.notFound().build();
         }
         var serviceDTO = new ServiceDTO();
+        var pageRequest = PageRequest.of(page.orElse(0), 20)
+                .withSort(Sort.Direction.DESC, "expirateAt");
         BeanUtils.copyProperties(service, serviceDTO);
-        serviceDTO.setPayments(paymentService
-                .getPageablePaymentsByServiceId(PageRequest.of(page, 10)
-                        .withSort(Sort.Direction.DESC, "expirateAt"), service.getId()).stream().toList());
+        status.ifPresentOrElse(s -> {
+            try {
+                PaymentStatus.valueOf(status.get().toUpperCase());
+                serviceDTO.setPayments(paymentService
+                        .getPageableFilteredPaymentsByServiceId(pageRequest, service.getId(),
+                                PaymentStatus.valueOf(status.get().toUpperCase())).stream().toList());
+            } catch (IllegalArgumentException ignored) {
+            }
+        }, () -> serviceDTO.setPayments(paymentService
+                .getPageablePaymentsByServiceId(pageRequest, service.getId()).stream().toList()));
 
         return ResponseEntity.ok(serviceDTO);
     }
