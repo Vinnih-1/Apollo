@@ -31,7 +31,7 @@ public class CouponModel {
     private ServiceModel service;
 
     @JsonIgnore
-    @OneToMany(mappedBy = "coupon", fetch = FetchType.LAZY)
+    @OneToMany(mappedBy = "coupon", fetch = FetchType.LAZY, cascade = CascadeType.ALL)
     private List<PaymentModel> payments;
 
     @Column(name = "coupon_usage")
