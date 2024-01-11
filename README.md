@@ -55,5 +55,3 @@ Depois da autorização, a categoria de vendas é criada e o usuário está apto
 
 O projeto tem o domínio registrado apollodiscord.com, porém não há recursos para mantê-lo de pé. Então decidi continuar o desenvolvimento apenas para aprendizado.
 Ainda em fase de desenvolvimento, qualquer pull request será bem-vindo.
-
-PODE HAVER ATUALIZAÇÕES DE QUEBRA.
